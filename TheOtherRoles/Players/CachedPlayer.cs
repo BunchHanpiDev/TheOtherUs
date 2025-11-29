@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using InnerNet;
 using UnityEngine;
 
 namespace TheOtherRoles.Players;
@@ -48,7 +47,7 @@ public static class CachedPlayerPatches
         [HarmonyPostfix]
         public static void SetLocalPlayer()
         {
-            var localPlayer = PlayerControl.LocalPlayer;
+			/*var localPlayer = PlayerControl.LocalPlayer;
             if (!localPlayer )
             {
                 CachedPlayer.LocalPlayer = null;
@@ -60,8 +59,9 @@ public static class CachedPlayerPatches
             {
                 CachedPlayer.LocalPlayer = cached;
                 return;
-            }
-        }
+            }*/
+			CachedPlayer.LocalPlayer = CachedPlayer.AllPlayers.FirstOrDefault(p => p.PlayerControl.Pointer == PlayerControl.LocalPlayer.Pointer);
+		}
     }
     
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Awake))]

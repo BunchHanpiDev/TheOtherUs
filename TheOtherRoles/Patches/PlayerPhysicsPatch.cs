@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Impostor;
 
 namespace TheOtherRoles.Patches
 {

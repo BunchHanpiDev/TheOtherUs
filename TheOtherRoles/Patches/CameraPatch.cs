@@ -7,6 +7,7 @@ using UnityEngine;
 using static TheOtherRoles.TheOtherRoles;
 using System.Reflection;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
 
 namespace TheOtherRoles.Patches {
 

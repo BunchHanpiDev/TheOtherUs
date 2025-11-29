@@ -8,6 +8,10 @@ using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
 using System.Threading.Tasks;
 using System.Net.Http;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles
 {

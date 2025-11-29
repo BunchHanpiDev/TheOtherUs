@@ -2,14 +2,11 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BepInEx;
-using BepInEx.Unity.IL2CPP;
 using BepInEx.Unity.IL2CPP.Utils;
 using HarmonyLib;
 using UnityEngine;
@@ -19,9 +16,9 @@ namespace TheOtherRoles.Modules;
 
 public class BepInExUpdater : MonoBehaviour
 {
-    public const string RequiredBepInExVersion = "6.0.0-be.671+9caf61dca07043beae57b0771f6a5283aa02436b";
-    public const string BepInExDownloadURL = "https://builds.bepinex.dev/projects/bepinex_be/671/BepInEx-Unity.IL2CPP-win-x86-6.0.0-be.671%2B9caf61d.zip";
-    public static bool UpdateRequired => Paths.BepInExVersion.ToString() != RequiredBepInExVersion;
+	public const string RequiredBepInExVersion = "6.0.0-be.688+49015217f3becf052d33fa4658ac19229f5daa3a";
+	public const string BepInExDownloadURL = "https://builds.bepinex.dev/projects/bepinex_be/688/BepInEx-Unity.IL2CPP-win-x86-6.0.0-be.688%2B4901521.zip";
+	public static bool UpdateRequired => Paths.BepInExVersion.ToString() != RequiredBepInExVersion;
 
     public void Awake()
     {

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TheOtherRoles;
 using TheOtherRoles.CustomGameModes;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Modifier;
 using TheOtherRoles.Utilities;
 using TMPro;
 using UnityEngine;
@@ -16,11 +16,11 @@ namespace TheOtherRoles.Patches {
         public static string fullCredentialsVersion = 
 $@"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays>0 ? "-BETA": "")}";
 public static string fullCredentials =
-$@"<size=60%>Modified by <color=#FCCE03FF>Spex</color>
+$@"<size=60%>Modified by <color=#00ffff>FangKuai</color> & <color=#FCCE03FF>Spex</color>
 Based on TheOtherRoles";
 
     public static string mainMenuCredentials = 
-$@"Modified by <color=#FCCE03FF>Spex</color>, based on TheOtherRoles by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, 
+$@"Modified by <color=#00ffff>FangKuai</color> & <color=#FCCE03FF>Spex</color>, based on TheOtherRoles by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, 
 <color=#FCCE03FF>EndOfFile</color>, <color=#FCCE03FF>Mallöris</color> & <color=#FCCE03FF>Gendelo</color>
 Design by <color=#FCCE03FF>Bavari</color>";
 

@@ -6,6 +6,10 @@ using static TheOtherRoles.TheOtherRoles;
 using TheOtherRoles.Objects;
 using System;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 using TheOtherRoles.Utilities;
 using UnityEngine;
 

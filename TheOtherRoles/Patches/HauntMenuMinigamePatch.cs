@@ -5,6 +5,7 @@ using System.Linq;
 using TheOtherRoles.Players;
 using System;
 using TheOtherRoles.CustomGameModes;
+using TheOtherRoles.Roles.Impostor;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]

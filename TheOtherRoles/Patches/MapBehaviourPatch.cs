@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TheOtherRoles.Objects;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Utilities;
 using UnityEngine;
 

@@ -2,6 +2,7 @@ using Il2CppSystem.Runtime.ExceptionServices;
 using System;
 using System.Collections.Generic;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

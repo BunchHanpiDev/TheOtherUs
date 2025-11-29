@@ -1,5 +1,7 @@
 using HarmonyLib;
 using System;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 using TheOtherRoles.Utilities;
 
 namespace TheOtherRoles {

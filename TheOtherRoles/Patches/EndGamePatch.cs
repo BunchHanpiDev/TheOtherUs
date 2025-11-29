@@ -9,6 +9,8 @@ using System.Text;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles.Patches {
     enum CustomGameOverReason {

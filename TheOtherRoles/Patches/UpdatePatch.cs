@@ -9,6 +9,10 @@ using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
 using AmongUs.GameOptions;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
@@ -240,7 +244,19 @@ namespace TheOtherRoles.Patches {
                     if (target != null)  player.NameText.text += $" ({(Helpers.isLighterColor(target) ? "L" : "D")})";
                 }
             }
-        }
+
+			// Add medic shield info:
+			if (MeetingHud.Instance != null && Medic.medic != null && Medic.shielded != null && Medic.shieldVisible(Medic.shielded))
+			{
+				foreach (PlayerVoteArea player in MeetingHud.Instance.playerStates)
+					if (player.TargetPlayerId == Medic.shielded.PlayerId)
+					{
+						player.NameText.text = Helpers.cs(Medic.color, "[") + player.NameText.text + Helpers.cs(Medic.color, "]");
+						// player.HighlightedFX.color = Medic.color;
+						// player.HighlightedFX.enabled = true;
+					}
+			}
+		}
 
         static void updateShielded() {
             if (Medic.shielded == null) return;

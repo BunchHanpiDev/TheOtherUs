@@ -16,6 +16,9 @@ using Reactor.Utilities.Extensions;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
 using BepInEx;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 using static ShipStatus;
 
 namespace TheOtherRoles {
@@ -104,8 +107,8 @@ namespace TheOtherRoles {
         }
 
         public static void saveVanillaOptions() {
-            vanillaSettings.Value = Convert.ToBase64String(GameOptionsManager.Instance.gameOptionsFactory.ToBytes(GameManager.Instance.LogicOptions.currentGameOptions));
-        }
+			vanillaSettings.Value = Convert.ToBase64String(GameOptionsManager.Instance.gameOptionsFactory.ToBytes(GameManager.Instance.LogicOptions.currentGameOptions, false));
+		}
 
         public static void loadVanillaOptions() {
             string optionsString = vanillaSettings.Value;

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
 
 namespace TheOtherRoles{
     static class TORMapOptions {

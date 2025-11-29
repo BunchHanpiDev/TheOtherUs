@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using TheOtherRoles.Players;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Utilities;
 using static TheOtherRoles.TheOtherRoles;
 
@@ -100,7 +102,7 @@ namespace TheOtherRoles.Objects {
             animationFgRenderer.material = FastDestroyableSingleton<HatManager>.Instance.PlayerMaterial;
 
             // Only render the inactive portals for the Portalmaker
-            bool playerIsPortalmaker = CachedPlayer.LocalPlayer.PlayerControl == TheOtherRoles.Portalmaker.portalmaker;
+            bool playerIsPortalmaker = CachedPlayer.LocalPlayer.PlayerControl == Portalmaker.portalmaker;
             portalGameObject.SetActive(playerIsPortalmaker);
             portalFgAnimationGameObject.SetActive(true);
 

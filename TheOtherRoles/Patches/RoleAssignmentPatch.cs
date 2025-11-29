@@ -9,6 +9,9 @@ using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using static TheOtherRoles.TheOtherRoles;
 using TheOtherRoles.CustomGameModes;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(RoleOptionsCollectionV07), nameof(RoleOptionsCollectionV07.GetNumPerGame))]

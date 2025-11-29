@@ -18,6 +18,10 @@ using AmongUs.GameOptions;
 using TheOtherRoles.Patches;
 using TheOtherRoles.Objects;
 using System.Collections;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles {
 

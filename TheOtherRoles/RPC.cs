@@ -16,6 +16,10 @@ using TheOtherRoles.CustomGameModes;
 using AmongUs.Data;
 using AmongUs.GameOptions;
 using Assets.CoreScripts;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles
 {
@@ -124,10 +128,11 @@ namespace TheOtherRoles
         DynamicMapOption,
         SetGameStarting,
         ShareGamemode,
+		StopStart,
 
-        // Role functionality
+		// Role functionality
 
-        EngineerFixLights = 101,
+		EngineerFixLights = 101,
         EngineerFixSubmergedOxygen,
         EngineerUsedRepair,
         CleanBody,
@@ -280,7 +285,14 @@ namespace TheOtherRoles
             TORMapOptions.gameMode = (CustomGamemodes) gm;
         }
 
-        public static void workaroundSetRoles(byte numberOfRoles, MessageReader reader)
+		public static void stopStart(byte playerId) {
+			if (AmongUsClient.Instance.AmHost && CustomOptionHolder.anyPlayerCanStopStart.getBool()) {
+				GameStartManager.Instance.ResetStartState();
+				PlayerControl.LocalPlayer.RpcSendChat($"{Helpers.playerById(playerId).Data.PlayerName} stopped the game start!");
+			}
+		}
+
+		public static void workaroundSetRoles(byte numberOfRoles, MessageReader reader)
         {
                 for (int i = 0; i < numberOfRoles; i++)
                 {                   
@@ -296,14 +308,14 @@ namespace TheOtherRoles
         }
 
         public static void setRole(byte roleId, byte playerId) {
-            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
                 if (player.PlayerId == playerId) {
                     switch((RoleId)roleId) {
                     case RoleId.Jester:
                         Jester.jester = player;
                         break;
                     case RoleId.Crew:
-                        Crew.crew = player;
+                        Crewmate.crewmate = player;
                         break;
                     case RoleId.Werewolf:
                         Werewolf.werewolf = player;
@@ -487,8 +499,14 @@ namespace TheOtherRoles
                         Bomber.bomber = player;
                         break;
                     }
-        }
-        }
+					if (AmongUsClient.Instance.AmHost && Helpers.roleCanUseVents(player) && !player.Data.Role.IsImpostor)
+					{
+						player.RpcSetRole(RoleTypes.Engineer);
+						player.SetRole(RoleTypes.Engineer);
+					}
+				}
+			}
+		}
 
         public static void setModifier(byte modifierId, byte playerId, byte flag) {
             PlayerControl player = Helpers.playerById(playerId); 
@@ -1497,7 +1515,9 @@ namespace TheOtherRoles
                 Sidekick.wasSpy = wasSpy;
                 Sidekick.wasImpostor = wasImpostor;
                 if (player == CachedPlayer.LocalPlayer.PlayerControl) SoundEffectsManager.play("jackalSidekick");
-            }
+				if (HandleGuesser.isGuesserGm && CustomOptionHolder.guesserGamemodeSidekickIsAlwaysGuesser.getBool() && !HandleGuesser.isGuesser(targetId))
+					setGuesserGm(targetId);
+			}
             Jackal.canCreateSidekick = false;
         }
 
@@ -2077,7 +2097,7 @@ namespace TheOtherRoles
         public static void arsonistWin() {
             Arsonist.triggerArsonistWin = true;
             foreach (PlayerControl p in CachedPlayer.AllPlayers) {
-                if (p != Arsonist.arsonist) {
+               if (p != Arsonist.arsonist && !p.Data.IsDead) {
                     p.Exiled();
                     overrideDeathReasonAndKiller(p, DeadPlayer.CustomDeathReason.Arson, Arsonist.arsonist);
                 }
@@ -2337,7 +2357,9 @@ namespace TheOtherRoles
             if (target == Sidekick.sidekick) {
                 Sidekick.sidekick = thief;
                 Jackal.formerJackals.Add(target);
-            }
+				if (HandleGuesser.isGuesserGm && CustomOptionHolder.guesserGamemodeSidekickIsAlwaysGuesser.getBool() && !HandleGuesser.isGuesser(thief.PlayerId))
+					setGuesserGm(thief.PlayerId);
+			}
             //if (target == Guesser.evilGuesser) Guesser.evilGuesser = thief;
             if (target == Godfather.godfather) Godfather.godfather = thief;
             if (target == Mafioso.mafioso) Mafioso.mafioso = thief;
@@ -2910,9 +2932,12 @@ namespace TheOtherRoles
                     byte gm = reader.ReadByte();
                     RPCProcedure.shareGamemode(gm);
                     break;
+				case (byte)CustomRPC.StopStart:
+					RPCProcedure.stopStart(reader.ReadByte());
+					break;
 
-                // Game mode
-                case (byte)CustomRPC.SetGuesserGm:
+				// Game mode
+				case (byte)CustomRPC.SetGuesserGm:
                     byte guesserGm = reader.ReadByte();
                     RPCProcedure.setGuesserGm(guesserGm);
                     break;

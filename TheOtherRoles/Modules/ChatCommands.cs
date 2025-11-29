@@ -5,6 +5,9 @@ using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using UnityEngine;
 using Hazel;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 using static TheOtherRoles.TheOtherRoles;
 
 namespace TheOtherRoles.Modules {

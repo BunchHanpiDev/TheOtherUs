@@ -6,6 +6,10 @@ using static TheOtherRoles.TheOtherRoles;
 using UnityEngine;
 using TheOtherRoles.CustomGameModes;
 using AmongUs.GameOptions;
+using TheOtherRoles.Roles.Crewmate;
+using TheOtherRoles.Roles.Impostor;
+using TheOtherRoles.Roles.Modifier;
+using TheOtherRoles.Roles.Neutral;
 
 namespace TheOtherRoles.Patches {
 

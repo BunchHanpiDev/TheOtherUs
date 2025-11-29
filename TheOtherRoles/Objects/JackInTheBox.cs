@@ -5,6 +5,7 @@ using System.Linq;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using Reactor.Utilities.Extensions;
+using TheOtherRoles.Roles.Impostor;
 
 namespace TheOtherRoles.Objects {
 
