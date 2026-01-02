@@ -409,7 +409,7 @@ namespace TheOtherRoles.Patches {
             exitButtonParent.transform.localScale = new Vector3(0.217f, 0.9f, 1);
             guesserUIExitButton = exitButton.GetComponent<PassiveButton>();
             guesserUIExitButton.OnClick.RemoveAllListeners();
-            guesserUIExitButton.OnClick.AddListener((System.Action)(() => {
+            guesserUIExitButton.OnClick.AddListener((Action)(() => {
                 __instance.playerStates.ToList().ForEach(x => {
                     x.gameObject.SetActive(true);
                     if (CachedPlayer.LocalPlayer.Data.IsDead && x.transform.FindChild("ShootButton") != null) UnityEngine.Object.Destroy(x.transform.FindChild("ShootButton").gameObject);

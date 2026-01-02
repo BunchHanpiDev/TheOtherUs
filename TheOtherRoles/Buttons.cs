@@ -708,7 +708,7 @@ namespace TheOtherRoles
                 },
                 () => { },
                 Disperser.getButtonSprite(),
-                new Vector3(0, 0f, 0),
+                new Vector3(0, 1f, 0),
                 __instance,
                 null,
                 true
@@ -1130,8 +1130,8 @@ namespace TheOtherRoles
                 () => { return Vampire.garlicButton && CachedPlayer.LocalPlayer.PlayerControl.CanMove && !Vampire.localPlacedGarlic; },
                 () => { },
                 Vampire.getGarlicButtonSprite(),
-                new Vector3(0, 1f, 0),
-                __instance,
+				new Vector3(0, -0.06f, 0),
+				__instance,
                 null,
                 true
             );

@@ -85,7 +85,7 @@ namespace TheOtherRoles.Patches {
             var localRole = RoleInfo.getRoleInfoForPlayer(localPlayer, false).FirstOrDefault();
             setPlayerNameColor(localPlayer, localRole.color);
 
-            /*if (Jester.jester != null && Jester.jester == localPlayer)
+			/*if (Jester.jester != null && Jester.jester == localPlayer)
                 setPlayerNameColor(Jester.jester, Jester.color);
             else if (Mayor.mayor != null && Mayor.mayor == localPlayer)
                 setPlayerNameColor(Mayor.mayor, Mayor.color);
@@ -96,13 +96,20 @@ namespace TheOtherRoles.Patches {
                 if (Deputy.deputy != null && Deputy.knowsSheriff) {
                     setPlayerNameColor(Deputy.deputy, Deputy.color);
                 }
-            } else*/
-            if (Deputy.deputy != null && Deputy.deputy == localPlayer) {
+            } else if (Deputy.deputy != null && Deputy.deputy == localPlayer) {
                 setPlayerNameColor(Deputy.deputy, Deputy.color);
                 if (Sheriff.sheriff != null && Deputy.knowsSheriff) {
                     setPlayerNameColor(Sheriff.sheriff, Sheriff.color);
                 }
-            } /*else if (Portalmaker.portalmaker != null && Portalmaker.portalmaker == localPlayer)
+            }*/
+
+			if (Sheriff.sheriff != null && Sheriff.sheriff == localPlayer)
+			{
+				setPlayerNameColor(Sheriff.sheriff, Sheriff.color);
+				if (Deputy.deputy != null && Deputy.knowsSheriff) setPlayerNameColor(Deputy.deputy, Sheriff.color);
+			}
+            
+            /*else if (Portalmaker.portalmaker != null && Portalmaker.portalmaker == localPlayer)
                 setPlayerNameColor(Portalmaker.portalmaker, Portalmaker.color);
             else if (Lighter.lighter != null && Lighter.lighter == localPlayer)
                 setPlayerNameColor(Lighter.lighter, Lighter.color);
@@ -124,7 +131,7 @@ namespace TheOtherRoles.Patches {
                 setPlayerNameColor(Tracker.tracker, Tracker.color);
             else if (Snitch.snitch != null && Snitch.snitch == localPlayer)
                 setPlayerNameColor(Snitch.snitch, Snitch.color);*/
-            else if (Jackal.jackal != null && Jackal.jackal == localPlayer) {
+			else if (Jackal.jackal != null && Jackal.jackal == localPlayer) {
                 // Jackal can see his sidekick
                 setPlayerNameColor(Jackal.jackal, Jackal.color);
                 if (Sidekick.sidekick != null) {

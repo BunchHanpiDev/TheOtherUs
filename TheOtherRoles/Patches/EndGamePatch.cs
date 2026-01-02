@@ -36,8 +36,9 @@ namespace TheOtherRoles.Patches {
         AdditionalLawyerBonusWin,
         AdditionalAlivePursuerWin,
         ProsecutorWin,
-        WerewolfWin
-    }
+        WerewolfWin,
+		EveryoneDied
+	}
 
     static class AdditionalTempData {
         // Should be implemented using a proper GameOverReason in the future
@@ -117,7 +118,8 @@ namespace TheOtherRoles.Patches {
             }
             foreach (var winner in winnersToRemove) TempData.winners.Remove(winner);
 
-            bool jesterWin = Jester.jester != null && gameOverReason == (GameOverReason)CustomGameOverReason.JesterWin;
+			var everyoneDead = AdditionalTempData.playerRoles.All(x => !x.IsAlive);
+			bool jesterWin = Jester.jester != null && gameOverReason == (GameOverReason)CustomGameOverReason.JesterWin;
             bool werewolfWin = gameOverReason == (GameOverReason)CustomGameOverReason.WerewolfWin && ((Werewolf.werewolf != null && !Werewolf.werewolf.Data.IsDead));
             bool arsonistWin = Arsonist.arsonist != null && gameOverReason == (GameOverReason)CustomGameOverReason.ArsonistWin;
             bool miniLose = Mini.mini != null && gameOverReason == (GameOverReason)CustomGameOverReason.MiniLose;
@@ -169,8 +171,15 @@ namespace TheOtherRoles.Patches {
                 AdditionalTempData.winCondition = WinCondition.ProsecutorWin;
             }
 
-            // Lovers win conditions
-            else if (loversWin) {
+			// Everyone Died
+			else if (everyoneDead)
+			{
+				TempData.winners = new Il2CppSystem.Collections.Generic.List<WinningPlayerData>();
+				AdditionalTempData.winCondition = WinCondition.EveryoneDied;
+			}
+
+			// Lovers win conditions
+			else if (loversWin) {
                 // Double win for lovers, crewmates also win
                 if (!Lovers.existingWithKiller()) {
                     AdditionalTempData.winCondition = WinCondition.LoversTeamWin;
@@ -347,8 +356,14 @@ namespace TheOtherRoles.Patches {
                 textRenderer.text = "Mini died";
                 textRenderer.color = Mini.color;
             }
+			else if (AdditionalTempData.winCondition == WinCondition.EveryoneDied)
+			{
+				textRenderer.text = "Everyone Died";
+				textRenderer.color = Palette.DisabledGrey;
+				__instance.BackgroundBar.material.SetColor("_Color", Palette.DisabledGrey);
+			}
 
-            foreach (WinCondition cond in AdditionalTempData.additionalWinConditions) {
+			foreach (WinCondition cond in AdditionalTempData.additionalWinConditions) {
                 if (cond == WinCondition.AdditionalLawyerBonusWin) {
                     textRenderer.text += $"\n{Helpers.cs(Lawyer.color, "The Lawyer wins with the client")}";
                 } else if (cond == WinCondition.AdditionalAlivePursuerWin) {

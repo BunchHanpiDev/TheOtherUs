@@ -112,18 +112,14 @@ namespace TheOtherRoles.Patches
                         VitalsPanel vitalsPanel = __instance.vitals[k];
                         GameData.PlayerInfo player = GameData.Instance.AllPlayers[k];
 
-                        // Hacker update
-                        if (vitalsPanel.IsDead)
-                        {
-                            DeadPlayer deadPlayer = deadPlayers?.Where(x => x.player?.PlayerId == player?.PlayerId)?.FirstOrDefault();
-                            if (deadPlayer != null && k < hackerTexts.Count && hackerTexts[k] != null)
-                            {
-                                float timeSinceDeath = ((float)(DateTime.UtcNow - deadPlayer.timeOfDeath).TotalMilliseconds);
-                                hackerTexts[k].gameObject.SetActive(true);
-                                hackerTexts[k].text = Math.Round(timeSinceDeath / 1000) + "s";
-                            }
-                        }
-                    }
+						// Hacker update
+						if (!vitalsPanel.IsDead) continue;
+						var deadPlayer = deadPlayers?.Where(x => x.player.PlayerId == player?.PlayerId)?.FirstOrDefault();
+						if (deadPlayer == null || k >= hackerTexts.Count || hackerTexts[k] == null) continue;
+						var timeSinceDeath = (float)(DateTime.UtcNow - deadPlayer.timeOfDeath).TotalMilliseconds;
+						hackerTexts[k].gameObject.SetActive(true);
+						hackerTexts[k].text = Math.Round(timeSinceDeath / 1000) + "s";
+					}
                 }
                 else
                 {
@@ -131,7 +127,9 @@ namespace TheOtherRoles.Patches
                         if (text != null && text.gameObject != null)
                             text.gameObject.SetActive(false);
                 }
-            }
+				foreach (var text in hackerTexts.Where(text => text != null && text.gameObject != null))
+					text.gameObject.SetActive(false);
+			}
         }
     }
 }
