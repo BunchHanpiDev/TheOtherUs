@@ -99,9 +99,12 @@ namespace TheOtherRoles.Patches {
             int crewCountSettings = rnd.Next(crewmateMin, crewmateMax + 1);
             int neutralCountSettings = rnd.Next(neutralMin, neutralMax + 1);
             int impCountSettings = rnd.Next(impostorMin, impostorMax + 1);
+			// If fill crewmates is enabled, make sure crew + neutral >= crewmates s.t. everyone has a role!
+			while (crewCountSettings + neutralCountSettings < crewmates.Count && CustomOptionHolder.crewmateRolesFill.getBool())
+				crewCountSettings++;
 
-            // Potentially lower the actual maximum to the assignable players
-            int maxCrewmateRoles = Mathf.Min(crewmates.Count, crewCountSettings);
+			// Potentially lower the actual maximum to the assignable players
+			int maxCrewmateRoles = Mathf.Min(crewmates.Count, crewCountSettings);
             int maxNeutralRoles = Mathf.Min(crewmates.Count, neutralCountSettings);
             int maxImpostorRoles = Mathf.Min(impostors.Count, impCountSettings);
 
@@ -502,7 +505,8 @@ namespace TheOtherRoles.Patches {
                 RoleId.Disperser,
                 RoleId.Cursed,
                 RoleId.Chameleon,
-                RoleId.Shifter
+				RoleId.Armored,
+				RoleId.Shifter
             });
 
             impModifiers.AddRange(new List<RoleId>
@@ -823,8 +827,12 @@ namespace TheOtherRoles.Patches {
                     selection = CustomOptionHolder.modifierChameleon.getSelection();
                     if (multiplyQuantity) selection *= CustomOptionHolder.modifierChameleonQuantity.getQuantity();
                     break;
-                case RoleId.Shifter:
-                    selection = CustomOptionHolder.modifierShifter.getSelection(); break;
+				case RoleId.Armored:
+					selection = CustomOptionHolder.modifierArmored.getSelection();
+					break;
+				case RoleId.Shifter:
+                    selection = CustomOptionHolder.modifierShifter.getSelection();
+                    break;
                 case RoleId.EvilGuesser:
                     selection = CustomOptionHolder.modifierAssassin.getSelection();
                     if (!Cultist.isCultistGame){

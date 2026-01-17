@@ -125,7 +125,8 @@ namespace TheOtherRoles
         public static RoleInfo tunneler  = new RoleInfo("Tunneler", Color.yellow, "Complete your tasks to gain the ability to vent", "Finish work so you can play", RoleId.Tunneler, false, true);
         public static RoleInfo disperser = new RoleInfo("Disperser", Color.red, "Separate the Crew", "Separate the Crew", RoleId.Disperser, false, true);
         public static RoleInfo chameleon = new RoleInfo("Chameleon", Color.yellow, "You're hard to see when not moving", "You're hard to see when not moving", RoleId.Chameleon, false, true);
-        public static RoleInfo shifter = new RoleInfo("Shifter", Color.yellow, "Shift your role", "Shift your role", RoleId.Shifter, false, true);
+		public static RoleInfo armored = new RoleInfo("Armored", Color.yellow, "You are protected from one murder attempt", "You are protected from one murder attempt", RoleId.Armored, false, true);
+		public static RoleInfo shifter = new RoleInfo("Shifter", Color.yellow, "Shift your role", "Shift your role", RoleId.Shifter, false, true);
         public static RoleInfo swooper = new RoleInfo("Swooper", Swooper.color, "Turn Invisible and kill everyone", "Turn Invisible", RoleId.Swooper, false, true);
         public static RoleInfo assassin = new RoleInfo("Assassin", Color.red, "Guess and shoot", "Guess and shoot", RoleId.EvilGuesser, false, true);
         
@@ -214,7 +215,8 @@ namespace TheOtherRoles
             tunneler,
             invert,
             chameleon,
-            shifter
+			armored,
+			shifter
         };
 
         public static List<RoleInfo> getRoleInfoForPlayer(PlayerControl p, bool showModifier = true) {
@@ -248,7 +250,8 @@ namespace TheOtherRoles
                 if (p == Disperser.disperser) infos.Add(disperser);
                 if (Invert.invert.Any(x => x.PlayerId == p.PlayerId)) infos.Add(invert);
                 if (Chameleon.chameleon.Any(x => x.PlayerId == p.PlayerId)) infos.Add(chameleon);
-                if (p == Shifter.shifter) infos.Add(shifter);
+				if (p == Armored.armored) infos.Add(armored);
+				if (p == Shifter.shifter) infos.Add(shifter);
                 if (Guesser.evilGuesser.Any(x => x.PlayerId == p.PlayerId)) infos.Add(assassin);
             }
 
@@ -331,9 +334,16 @@ namespace TheOtherRoles
             roleName = String.Join(" ", getRoleInfoForPlayer(p, showModifier).Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
             if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) 
                 roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
-            if (HandleGuesser.isGuesserGm && HandleGuesser.isGuesser(p.PlayerId)) roleName += " (Guesser)";
-
-            if (!suppressGhostInfo && p != null) {
+			if (HandleGuesser.isGuesserGm && HandleGuesser.isGuesser(p.PlayerId))
+			{
+				int remainingShots = HandleGuesser.remainingShots(p.PlayerId);
+				var (playerCompleted, playerTotal) = TasksHandler.taskInfo(p.Data);
+				if (!Helpers.isEvil(p) && playerCompleted < HandleGuesser.tasksToUnlock || remainingShots == 0)
+					roleName += Helpers.cs(Color.gray, " (Guesser)");
+				else
+					roleName += Helpers.cs(Color.white, " (Guesser)");
+			}
+			if (!suppressGhostInfo && p != null) {
                 if (p == Shifter.shifter && (PlayerControl.LocalPlayer == Shifter.shifter || Helpers.shouldShowGhostInfo()) && Shifter.futureShift != null)
                     roleName += Helpers.cs(Color.yellow, " ← " + Shifter.futureShift.Data.PlayerName);
                 if (p == Vulture.vulture && (PlayerControl.LocalPlayer == Vulture.vulture || Helpers.shouldShowGhostInfo()))

@@ -71,7 +71,7 @@ namespace TheOtherRoles.Roles.Crewmate
 			chanceAdditionalInfo = CustomOptionHolder.mediumChanceAdditionalInfo.getSelection() / 10f;
 		}
 
-		public static string getInfo(PlayerControl target, PlayerControl killer)
+		public static string getInfo(PlayerControl target, PlayerControl killer, DeadPlayer.CustomDeathReason deathReason)
 		{
 			string msg = "";
 
@@ -80,10 +80,10 @@ namespace TheOtherRoles.Roles.Crewmate
 			// suicides:
 			if (killer == target)
 			{
-				if (target == Sheriff.sheriff || target == Sheriff.formerSheriff) infos.Add(SpecialMediumInfo.SheriffSuicide);
+				if ((target == Sheriff.sheriff || target == Sheriff.formerSheriff) && deathReason != DeadPlayer.CustomDeathReason.LoverSuicide) infos.Add(SpecialMediumInfo.SheriffSuicide);
 				if (target == Lovers.lover1 || target == Lovers.lover2) infos.Add(SpecialMediumInfo.PassiveLoverSuicide);
-				if (target == Thief.thief) infos.Add(SpecialMediumInfo.ThiefSuicide);
-				if (target == Warlock.warlock) infos.Add(SpecialMediumInfo.WarlockSuicide);
+				if (target == Thief.thief && deathReason != DeadPlayer.CustomDeathReason.LoverSuicide) infos.Add(SpecialMediumInfo.ThiefSuicide);
+				if (target == Warlock.warlock && deathReason != DeadPlayer.CustomDeathReason.LoverSuicide) infos.Add(SpecialMediumInfo.WarlockSuicide);
 			}
 			else
 			{

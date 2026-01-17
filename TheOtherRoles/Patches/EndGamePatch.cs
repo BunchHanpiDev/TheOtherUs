@@ -67,9 +67,9 @@ namespace TheOtherRoles.Patches {
 
 
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameEnd))]
-    public class OnGameEndPatch {
-        private static GameOverReason gameOverReason;
-        public static void Prefix(AmongUsClient __instance, [HarmonyArgument(0)]ref EndGameResult endGameResult) {
+    public static class OnGameEndPatch {
+		public static GameOverReason gameOverReason = GameOverReason.HumansByTask;
+		public static void Prefix(AmongUsClient __instance, [HarmonyArgument(0)]ref EndGameResult endGameResult) {
             gameOverReason = endGameResult.GameOverReason;
             if ((int)endGameResult.GameOverReason >= 10) endGameResult.GameOverReason = GameOverReason.ImpostorByKill;
 
@@ -135,7 +135,7 @@ namespace TheOtherRoles.Patches {
                 CachedPlayerData wpd = new CachedPlayerData(Mini.mini.Data);
                 wpd.IsYou = false; // If "no one is the Mini", it will display the Mini, but also show defeat to everyone
                 EndGameResult.CachedWinners.Add(wpd);
-                AdditionalTempData.winCondition = WinCondition.MiniLose;  
+                AdditionalTempData.winCondition = WinCondition.MiniLose;
             }
 
             // Jester win
@@ -208,7 +208,7 @@ namespace TheOtherRoles.Patches {
                 AdditionalTempData.winCondition = WinCondition.JackalWin;
                 EndGameResult.CachedWinners = new Il2CppSystem.Collections.Generic.List<CachedPlayerData>();
                 CachedPlayerData wpd = new CachedPlayerData(Jackal.jackal.Data);
-                wpd.IsImpostor = false; 
+                wpd.IsImpostor = false;
                 EndGameResult.CachedWinners.Add(wpd);
                 // If there is a sidekick. The sidekick also wins
                 if (Sidekick.sidekick != null) {
@@ -360,6 +360,40 @@ namespace TheOtherRoles.Patches {
 				textRenderer.text = "Everyone Died";
 				textRenderer.color = Palette.DisabledGrey;
 				__instance.BackgroundBar.material.SetColor("_Color", Palette.DisabledGrey);
+			}
+			else if (AdditionalTempData.winCondition == WinCondition.Default)
+			{
+				switch (OnGameEndPatch.gameOverReason)
+				{
+					case GameOverReason.ImpostorDisconnect:
+						textRenderer.text = "Last Crewmate Disconnected";
+						textRenderer.color = Color.red;
+						break;
+					case GameOverReason.ImpostorByKill:
+						textRenderer.text = "Impostors Win - By Kill";
+						textRenderer.color = Color.red;
+						break;
+					case GameOverReason.ImpostorBySabotage:
+						textRenderer.text = "Impostors Win - By Sabotage";
+						textRenderer.color = Color.red;
+						break;
+					case GameOverReason.ImpostorByVote:
+						textRenderer.text = "Impostors Win - By Vote, Guess or DC";
+						textRenderer.color = Color.red;
+						break;
+					case GameOverReason.HumansByTask:
+						textRenderer.text = "Crew Wins - Taskwin";
+						textRenderer.color = Color.white;
+						break;
+					case GameOverReason.HumansDisconnect:
+						textRenderer.text = "Crew Wins - No Evil Killers Left";
+						textRenderer.color = Color.white;
+						break;
+					case GameOverReason.HumansByVote:
+						textRenderer.text = "Crew Wins - No Evil Killers Left";
+						textRenderer.color = Color.white;
+						break;
+				}
 			}
 
 			foreach (WinCondition cond in AdditionalTempData.additionalWinConditions) {

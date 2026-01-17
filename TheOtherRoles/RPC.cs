@@ -108,7 +108,8 @@ namespace TheOtherRoles
         Blind,
         Invert,
         Chameleon,
-        Shifter
+		Armored,
+		Shifter
     }
 
     enum CustomRPC
@@ -216,6 +217,7 @@ namespace TheOtherRoles
         ShareRoom,
 		YoyoMarkLocation,
 		YoyoBlink,
+		BreakArmor,
 
 		// Gamemode
 		SetGuesserGm,
@@ -589,7 +591,10 @@ namespace TheOtherRoles
                 case RoleId.Chameleon:
                     Chameleon.chameleon.Add(player);
                     break;
-                case RoleId.Shifter:
+				case RoleId.Armored:
+					Armored.armored = player;
+					break;
+				case RoleId.Shifter:
                     Shifter.shifter = player;
                     break;
             }
@@ -2643,6 +2648,16 @@ namespace TheOtherRoles
 			if (Chameleon.chameleon.Any(x => x.PlayerId == Yoyo.yoyo.PlayerId)) // Make the Yoyo visible if chameleon!
 				Chameleon.lastMoved[Yoyo.yoyo.PlayerId] = Time.time;
 		}
+
+		public static void breakArmor()
+		{
+			if (Armored.armored == null || Armored.isBrokenArmor) return;
+			Armored.isBrokenArmor = true;
+			if (PlayerControl.LocalPlayer.Data.IsDead)
+			{
+				Armored.armored.ShowFailedMurder();
+			}
+		}
 	}
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
@@ -2996,6 +3011,9 @@ namespace TheOtherRoles
 					break;
 				case (byte)CustomRPC.YoyoBlink:
 					RPCProcedure.yoyoBlink(reader.ReadByte() == byte.MaxValue, reader.ReadBytesAndSize());
+					break;
+				case (byte)CustomRPC.BreakArmor:
+					RPCProcedure.breakArmor();
 					break;
 
 				// Game mode

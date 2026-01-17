@@ -13,7 +13,7 @@ using TheOtherRoles.Utilities;
 using UnityEngine;
 
 namespace TheOtherRoles.Patches {
-    [HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
+    [HarmonyPatch(typeof(ExileController), nameof(ExileController.BeginForGameplay))]
     [HarmonyPriority(Priority.First)]
     class ExileControllerBeginPatch {
         public static NetworkedPlayerInfo lastExiled;
@@ -134,15 +134,17 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(ExileController), nameof(ExileController.WrapUp))]
         class BaseExileControllerPatch {
             public static void Postfix(ExileController __instance) {
-                WrapUpPostfix(__instance.exiled);
-            }
+				NetworkedPlayerInfo networkedPlayer = __instance.initData.networkedPlayer;
+				WrapUpPostfix((networkedPlayer != null) ? networkedPlayer.Object : null);
+			}
         }
 
         [HarmonyPatch(typeof(AirshipExileController), nameof(AirshipExileController.WrapUpAndSpawn))]
         class AirshipExileControllerPatch {
             public static void Postfix(AirshipExileController __instance) {
-                WrapUpPostfix(__instance.exiled);
-            }
+				NetworkedPlayerInfo networkedPlayer = __instance.initData.networkedPlayer;
+				WrapUpPostfix((networkedPlayer != null) ? networkedPlayer.Object : null);
+			}
         }
 
         // Workaround to add a "postfix" to the destroying of the exile controller (i.e. cutscene) and SpwanInMinigame of submerged
@@ -157,14 +159,14 @@ namespace TheOtherRoles.Patches {
             // submerged
             if (!SubmergedCompatibility.IsSubmerged) return;
             if (obj.name.Contains("ExileCutscene")) {
-                WrapUpPostfix(ExileControllerBeginPatch.lastExiled);
-            } else if (obj.name.Contains("SpawnInMinigame")) {
+				WrapUpPostfix(obj.GetComponent<ExileController>().initData.networkedPlayer?.Object);
+			} else if (obj.name.Contains("SpawnInMinigame")) {
                 AntiTeleport.setPosition();
                 Chameleon.lastMoved.Clear();
             }
         }
 
-        static void WrapUpPostfix(NetworkedPlayerInfo exiled) {
+        static void WrapUpPostfix(PlayerControl exiled) {
             // Prosecutor win condition
             if (exiled != null && Lawyer.lawyer != null && Lawyer.target != null && Lawyer.isProsecutor && Lawyer.target.PlayerId == exiled.PlayerId && !Lawyer.lawyer.Data.IsDead)
                 Lawyer.triggerProsecutorWin = true;
@@ -467,8 +469,9 @@ namespace TheOtherRoles.Patches {
     class ExileControllerMessagePatch {
         static void Postfix(ref string __result, [HarmonyArgument(0)]StringNames id) {
             try {
-                if (ExileController.Instance != null && ExileController.Instance.exiled != null) {
-                    PlayerControl player = Helpers.playerById(ExileController.Instance.exiled.Object.PlayerId);
+				if (ExileController.Instance != null && ExileController.Instance.initData != null)
+				{
+					PlayerControl player = ExileController.Instance.initData.networkedPlayer.Object;
                     if (player == null) return;
                     // Exile role text
                     if (id == StringNames.ExileTextPN || id == StringNames.ExileTextSN || id == StringNames.ExileTextPP || id == StringNames.ExileTextSP) {

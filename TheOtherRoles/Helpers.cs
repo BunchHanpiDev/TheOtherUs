@@ -394,6 +394,7 @@ namespace TheOtherRoles {
             return null;
         }
 
+               /* This function has been removed from TOR because we switched to assetbundles for compressed audio. leaving it here for reference - Gendelo
         public static AudioClip loadAudioClipFromResources(string path, string clipName = "UNNAMED_TOR_AUDIO_CLIP") {
             // must be "raw (headerless) 2-channel signed 32 bit pcm (le)" (can e.g. use Audacity® to export)
             try {
@@ -418,11 +419,10 @@ namespace TheOtherRoles {
             }
             return null;
 
-            /* Usage example:
-            AudioClip exampleClip = Helpers.loadAudioClipFromResources("TheOtherRoles.Resources.exampleClip.raw");
-            if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(exampleClip, false, 0.8f);
-            */
-        }
+            // Usage example:
+            //AudioClip exampleClip = Helpers.loadAudioClipFromResources("TheOtherRoles.Resources.exampleClip.raw");
+            //if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(exampleClip, false, 0.8f);
+        }*/
 
         public static string readTextFromResources(string path) {
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -828,6 +828,25 @@ namespace TheOtherRoles {
             return roleCouldUse;
         }
 
+		public static bool checkArmored(PlayerControl target, bool breakShield, bool showShield, bool additionalCondition = true)
+		{
+			if (target != null && Armored.armored != null && Armored.armored == target && !Armored.isBrokenArmor && additionalCondition)
+			{
+				if (breakShield)
+				{
+					MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.BreakArmor, Hazel.SendOption.Reliable, -1);
+					AmongUsClient.Instance.FinishRpcImmediately(writer);
+					RPCProcedure.breakArmor();
+				}
+				if (showShield)
+				{
+					target.ShowFailedMurder();
+				}
+				return true;
+			}
+			return false;
+		}
+
 		public static MurderAttemptResult checkMuderAttempt(PlayerControl killer, PlayerControl target, bool blockRewind = false, bool ignoreBlank = false, bool ignoreIfKillerIsDead = false, bool ignoreMedic = false)
 		{
 			var targetRole = RoleInfo.getRoleInfoForPlayer(target, false).FirstOrDefault();
@@ -937,12 +956,19 @@ namespace TheOtherRoles {
 
             // Thief if hit crew only kill if setting says so, but also kill the thief.
             else if (Thief.isFailedThiefKill(target, killer, targetRole)) {
-                Thief.suicideFlag = true;
+				if (!checkArmored(killer, true, true))
+					Thief.suicideFlag = true;
                 return MurderAttemptResult.SuppressKill;
             }
 
-            // Block hunted with time shield kill
-            else if (Hunted.timeshieldActive.Contains(target.PlayerId)) {
+			// Block Armored with armor kill
+			else if (checkArmored(target, true, killer == PlayerControl.LocalPlayer, Sheriff.sheriff == null || killer.PlayerId != Sheriff.sheriff.PlayerId || isEvil(target) && Sheriff.canKillNeutrals || isKiller(target)))
+			{
+				return MurderAttemptResult.BlankKill;
+			}
+
+			// Block hunted with time shield kill
+			else if (Hunted.timeshieldActive.Contains(target.PlayerId)) {
                 MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)CustomRPC.HuntedRewindTime, Hazel.SendOption.Reliable, -1);
                 writer.Write(target.PlayerId);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);

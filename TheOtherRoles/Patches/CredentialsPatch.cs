@@ -15,11 +15,11 @@ namespace TheOtherRoles.Patches
 	[HarmonyPatch]
 	public static class CredentialsPatch
 	{
-		public static string fullCredentialsVersion =
+		/*public static string fullCredentialsVersion =
 $@"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}";
 		public static string fullCredentials =
 		$@"<size=60%>Modified by <color=#00ffff>FangKuai</color> & <color=#FCCE03FF>Spex</color>
-Based on TheOtherRoles";
+Based on TheOtherRoles";*/
 
 		public static string mainMenuCredentials =
 	$@"Modified by <color=#00ffff>FangKuai</color> & <color=#FCCE03FF>Spex</color>, based on TheOtherRoles by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, 
@@ -34,10 +34,10 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 		{
 			static void Postfix(PingTracker __instance)
 			{
-				var position = __instance.GetComponent<AspectPosition>();
+				// var position = __instance.GetComponent<AspectPosition>();
 				if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
 				{
-					string gameModeText = $"";
+					/*string gameModeText = $"";
 					if (HideNSeek.isHideNSeekGM) gameModeText = $"Hide 'N Seek";
 					else if (HandleGuesser.isGuesserGm) gameModeText = $"Guesser";
 					else if (PropHunt.isPropHuntGM) gameModeText = "Prop Hunt";
@@ -45,7 +45,7 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 					__instance.text.text = $"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n{gameModeText}" + __instance.text.text;
 					__instance.text.alignment = TextAlignmentOptions.Top;
 					position.Alignment = AspectPosition.EdgeAlignments.Top;
-					position.DistanceFromEdge = new Vector3(1.5f, 0.11f, 0);
+					position.DistanceFromEdge = new Vector3(1.5f, 0.11f, 0);*/
 				}
 				else
 				{
@@ -55,10 +55,10 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 					else if (TORMapOptions.gameMode == CustomGamemodes.PropHunt) gameModeText = $"Prop Hunt";
 					if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText);
 
-					__instance.text.text = $"{fullCredentialsVersion}\n{fullCredentials}\n {__instance.text.text}"; 
-					__instance.text.alignment = TextAlignmentOptions.TopLeft;
-					position.Alignment = AspectPosition.EdgeAlignments.LeftTop;
-					position.DistanceFromEdge = new Vector3(0.5f, 0.11f);
+					// __instance.text.text = $"{fullCredentialsVersion}\n{fullCredentials}\n {__instance.text.text}"; 
+					// __instance.text.alignment = TextAlignmentOptions.TopLeft;
+					// position.Alignment = AspectPosition.EdgeAlignments.LeftTop;
+					// position.DistanceFromEdge = new Vector3(0.5f, 0.11f);
 
 					try
 					{
@@ -69,7 +69,7 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 					}
 					catch { }
 				}
-				position.AdjustPosition();
+				// position.AdjustPosition();
 			}
 		}
 
@@ -96,7 +96,6 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 				renderer.sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.Banner.png", 300f);
 
 				instance = __instance;
-				loadSprites();
 				// renderer.sprite = TORMapOptions.enableHorseMode ? horseBannerSprite : bannerSprite;
 				renderer.sprite = EventUtility.isEnabled ? banner2Sprite : bannerSprite;
 				var credentialObject = new GameObject("credentialsTOR");

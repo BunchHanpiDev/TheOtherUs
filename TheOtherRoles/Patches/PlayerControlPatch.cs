@@ -84,7 +84,13 @@ namespace TheOtherRoles.Patches {
                     color = Color.blue;
                 }
 
-                if (hasVisibleShield) {
+				if (PlayerControl.LocalPlayer.Data.IsDead && Armored.armored != null && target == Armored.armored && !Armored.isBrokenArmor && !hasVisibleShield)
+				{
+					hasVisibleShield = true;
+					color = Color.yellow;
+				}
+
+				if (hasVisibleShield) {
                 target.cosmetics.currentBodySprite.BodySprite.material.SetFloat("_Outline", 1f);
                 target.cosmetics.currentBodySprite.BodySprite.material.SetColor("_OutlineColor", color);
                 }
@@ -1643,8 +1649,8 @@ namespace TheOtherRoles.Patches {
             }
 
             // Snitch
-            if (Snitch.snitch != null && PlayerControl.LocalPlayer.PlayerId == Snitch.snitch.PlayerId && MapBehaviourPatch.herePoints.Keys.Any(x => x.PlayerId == target.PlayerId)) {
-                foreach (var a in MapBehaviourPatch.herePoints.Where(x => x.Key.PlayerId == target.PlayerId)) {
+            if (Snitch.snitch != null && PlayerControl.LocalPlayer.PlayerId == Snitch.snitch.PlayerId && MapBehaviourPatch.herePoints.Keys.Any(x => x == target.PlayerId)) {
+                foreach (var a in MapBehaviourPatch.herePoints.Where(x => x.Key == target.PlayerId)) {
                     UnityEngine.Object.Destroy(a.Value);
                     MapBehaviourPatch.herePoints.Remove(a.Key);
                 }

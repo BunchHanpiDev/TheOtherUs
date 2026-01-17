@@ -736,18 +736,22 @@ namespace TheOtherRoles.Patches {
                 }
             }
 
-            // Add Guesser Buttons
-            int remainingShots = HandleGuesser.remainingShots(PlayerControl.LocalPlayer.PlayerId);
+			// Add Guesser Buttons
+			int remainingShots = HandleGuesser.remainingShots(PlayerControl.LocalPlayer.PlayerId);
+			var (playerCompleted, playerTotal) = TasksHandler.taskInfo(PlayerControl.LocalPlayer.Data);
 
-            if (isGuesser && !PlayerControl.LocalPlayer.Data.IsDead && remainingShots > 0)
+			if (isGuesser && !PlayerControl.LocalPlayer.Data.IsDead && remainingShots > 0)
             {
                 for (int i = 0; i < __instance.playerStates.Length; i++)
                 {
                     PlayerVoteArea playerVoteArea = __instance.playerStates[i];
                     if (playerVoteArea.AmDead || playerVoteArea.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId) continue;
                     if (PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer == Eraser.eraser && Eraser.alreadyErased.Contains(playerVoteArea.TargetPlayerId)) continue;
+					if (playerVoteArea.AmDead || playerVoteArea.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId) continue;
+					if (PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer == Eraser.eraser && Eraser.alreadyErased.Contains(playerVoteArea.TargetPlayerId)) continue;
+					if (PlayerControl.LocalPlayer != null && !Helpers.isEvil(PlayerControl.LocalPlayer) && playerCompleted < HandleGuesser.tasksToUnlock) continue;
 
-                    GameObject template = playerVoteArea.Buttons.transform.Find("CancelButton").gameObject;
+					GameObject template = playerVoteArea.Buttons.transform.Find("CancelButton").gameObject;
                     GameObject targetBox = UnityEngine.Object.Instantiate(template, playerVoteArea.transform);
                     targetBox.name = "ShootButton";
                     targetBox.transform.localPosition = new Vector3(-0.95f, 0.03f, -1.3f);

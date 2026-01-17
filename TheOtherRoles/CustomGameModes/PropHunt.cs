@@ -2,14 +2,17 @@
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
+using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TheOtherRoles.Patches;
 using TheOtherRoles.Utilities;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Video;
 
 namespace TheOtherRoles.CustomGameModes {
     [HarmonyPatch]
@@ -73,7 +76,6 @@ namespace TheOtherRoles.CustomGameModes {
         public static float dangerMeterActive = 0f;
 
         private static List<GameObject> duplicatedCollider = new();
-        private static GameObject introObject;
 
         public static void clearAndReload() {
             remainingShots.Clear();
@@ -255,16 +257,19 @@ namespace TheOtherRoles.CustomGameModes {
                 float dist = 55f;
                 float dist2 = 15f;
                 float curr = float.MaxValue;
-                foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => !x.Data.IsDead && (PlayerControl.LocalPlayer.Data.Role.IsImpostor ? !x.Data.Role.IsImpostor : x.Data.Role.IsImpostor))) {
-                    if (invisPlayers.ContainsKey(playerControl.PlayerId)) continue;  // Dont light up for invisible players
-                    if (!(playerControl == null)) {
+                try {
+                    foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => !x.Data.IsDead && (PlayerControl.LocalPlayer.Data.Role.IsImpostor ? !x.Data.Role.IsImpostor : x.Data.Role.IsImpostor))) {
+                        if (invisPlayers.ContainsKey(playerControl.PlayerId)) continue;  // Dont light up for invisible players
+                        if (!(playerControl == null)) {
 
-                        float sqrMagnitude = (playerControl.transform.position - PlayerControl.LocalPlayer.transform.position).sqrMagnitude;
-                        if (sqrMagnitude < dist && curr > sqrMagnitude) {
-                            curr = sqrMagnitude;
+                            float sqrMagnitude = (playerControl.transform.position - PlayerControl.LocalPlayer.transform.position).sqrMagnitude;
+                            if (sqrMagnitude < dist && curr > sqrMagnitude) {
+                                curr = sqrMagnitude;
+                            }
                         }
                     }
                 }
+                catch { }
                 float dangerLevel1 = Mathf.Clamp01((dist - curr) / (dist - dist2));
                 float dangerLevel2 = Mathf.Clamp01((dist2 - curr) / dist2);
                 HudManager.Instance.DangerMeter.SetDangerValue(dangerLevel1, dangerLevel2);
@@ -352,7 +357,7 @@ namespace TheOtherRoles.CustomGameModes {
                 Collider2D bestCollider = null;
                 float bestDist = 9999;
                 if (whitelistedObjects == null || whitelistedObjects.Count == 0 || verbose) {
-                    updateWhitelistedObjects(true);
+                    updateWhitelistedObjects(verbose);
                 }
                 foreach (Collider2D collider in Physics2D.OverlapCircleAll(origin.transform.position, radius)) {
                     if (verbose) {
@@ -360,7 +365,7 @@ namespace TheOtherRoles.CustomGameModes {
                     }
                     bool whiteListed = false;
                     foreach (var whiteListedWord in whitelistedObjects) {
-                        if (collider.gameObject.name.Contains(whiteListedWord)) whiteListed = true;
+                        if ((bool)(collider.gameObject?.name?.Contains(whiteListedWord))) whiteListed = true;
                     }
                     if (collider.GetComponent<Console>() != null || whiteListed) {
                         float dist = Vector2.Distance(origin.transform.position, collider.transform.position);
@@ -371,7 +376,9 @@ namespace TheOtherRoles.CustomGameModes {
                     }
                 }
                 return bestCollider.gameObject;
-            } catch { return null; }
+            } catch (Exception e) {
+                TheOtherRolesPlugin.Logger.LogError($"Error in find closest disguise object: {e}");
+                return null; }
         }
 
         public static GameObject FindPropByNameAndPos(string propName, float posX) {
@@ -409,15 +416,29 @@ namespace TheOtherRoles.CustomGameModes {
             writer2.Write(true);
             AmongUsClient.Instance.FinishRpcImmediately(writer2);
             RPCProcedure.propHuntStartTimer(true);
-            introObject = new GameObject("introrenderer");
-            introObject.layer = HudManager.Instance.FullScreen.gameObject.layer;
-            introObject.transform.SetParent(HudManager.Instance.FullScreen.transform);
-            introObject.transform.localPosition = new Vector3(0, 0, -1f);
-            SpriteRenderer introRenderer = introObject.AddComponent<SpriteRenderer>();
-            introObject.SetActive(true);
-            introRenderer.enabled = true;
-            int nFrames = 25 * (int)initialBlackoutTime + 10;
-            FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(initialBlackoutTime, new Action<float>((p) => {
+
+
+            // Play mp4 video in Full Screen:
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            var resourceBundle = assembly.GetManifestResourceStream("TheOtherRoles.Resources.IntroAnimation.intro");
+            var assetBundle = AssetBundle.LoadFromMemory(resourceBundle.ReadFully());
+            VideoClip introVid = assetBundle.LoadAsset<VideoClip>("Assets/Video/intro.webm");
+            GameObject camera = GameObject.Find("Main Camera");
+            var videoPlayer = camera.AddComponent<UnityEngine.Video.VideoPlayer>();
+            videoPlayer.playOnAwake = false;
+            videoPlayer.renderMode = UnityEngine.Video.VideoRenderMode.CameraNearPlane;
+            videoPlayer.targetCameraAlpha = 1F;
+            videoPlayer.source = VideoSource.VideoClip;
+            videoPlayer.clip = introVid;
+            videoPlayer.aspectRatio = VideoAspectRatio.FitVertically;
+            // Skip the first 100 frames.
+            videoPlayer.frame = (21 - (int)initialBlackoutTime) * 25;
+            videoPlayer.isLooping = false;
+            videoPlayer.Play();
+
+
+            FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(initialBlackoutTime + 10f/25, new Action<float>((p) => {
                 if (p == 1f) {
                     // start timer
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.PropHuntStartTimer, Hazel.SendOption.Reliable, -1);
@@ -426,16 +447,13 @@ namespace TheOtherRoles.CustomGameModes {
                     RPCProcedure.propHuntStartTimer();
                     PlayerControl.LocalPlayer.moveable = true;
                     HudManager.Instance.FullScreen.enabled = false;
-                    introObject.Destroy();
+                    videoPlayer.Destroy();
+                    assetBundle.Unload(false);
                 } else {
                     HudManager.Instance.FullScreen.enabled = true;
                     HudManager.Instance.FullScreen.gameObject.SetActive(true);
-                    HudManager.Instance.FullScreen.color = new Color(0, 0, 0, 1);
-                    introRenderer.sprite?.Destroy();
-                    introRenderer.sprite = getIntroSprite(510 - nFrames + (int)(p * nFrames));
-                    Resources.UnloadUnusedAssets();  // Needed so that the last sprite gets unloaded
                 }
-            })));            
+            })));
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
@@ -503,14 +521,15 @@ namespace TheOtherRoles.CustomGameModes {
         [HarmonyPostfix]
         public static void MapSetPostfix() {  // Make sure the map in the settings is in sync with the map from li
             if (TORMapOptions.gameMode != CustomGamemodes.PropHunt && TORMapOptions.gameMode != CustomGamemodes.HideNSeek || AmongUsClient.Instance.IsGameStarted) return;
-            int map = GameOptionsManager.Instance.currentGameOptions.MapId;
+            int? map = GameOptionsManager.Instance?.currentGameOptions?.MapId;
+            if (map == null) return;
             if (map > 3) map--;
             if (TORMapOptions.gameMode == CustomGamemodes.HideNSeek)
                 if (CustomOptionHolder.hideNSeekMap.selection != map)
-                    CustomOptionHolder.hideNSeekMap.updateSelection(map);
+                    CustomOptionHolder.hideNSeekMap.updateSelection((int)map);
             if (TORMapOptions.gameMode == CustomGamemodes.PropHunt)
                 if (CustomOptionHolder.propHuntMap.selection != map)
-                    CustomOptionHolder.propHuntMap.updateSelection(map);
+                    CustomOptionHolder.propHuntMap.updateSelection((int)map);
         }
 
 

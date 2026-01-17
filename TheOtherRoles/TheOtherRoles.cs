@@ -97,9 +97,10 @@ namespace TheOtherRoles
             Vip.clearAndReload();
             Invert.clearAndReload();
             Chameleon.clearAndReload();
+			Armored.clearAndReload();
 
-            // Gamemodes
-            HandleGuesser.clearAndReload();
+			// Gamemodes
+			HandleGuesser.clearAndReload();
             HideNSeek.clearAndReload();
             PropHunt.clearAndReload();
 

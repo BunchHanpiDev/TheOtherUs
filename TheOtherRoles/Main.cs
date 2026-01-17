@@ -117,7 +117,10 @@ namespace TheOtherRoles
 			ServerManager.DefaultRegions = new Il2CppReferenceArray<IRegionInfo>(new IRegionInfo[0]);
 			UpdateRegions();
 
-            Harmony.PatchAll();
+			// Reactor Credits
+			Reactor.Utilities.ReactorCredits.Register("TheOtherUs", VersionString, betaDays > 0, location => location == Reactor.Utilities.ReactorCredits.Location.PingTracker);
+
+			Harmony.PatchAll();
             
             CustomOptionHolder.Load();
             CustomColors.Load();

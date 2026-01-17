@@ -93,8 +93,9 @@ namespace TheOtherRoles
         private static CustomButton propHuntSpeedboostButton;
         public static CustomButton propHuntAdminButton;
         public static CustomButton propHuntFindButton;
+		public static CustomButton eventKickButton;
 
-        public static Dictionary<byte, List<CustomButton>> deputyHandcuffedButtons = null;
+		public static Dictionary<byte, List<CustomButton>> deputyHandcuffedButtons = null;
         public static PoolablePlayer targetDisplay;
         public static GameObject propSpriteHolder;
         public static SpriteRenderer propSpriteRenderer;
@@ -530,8 +531,11 @@ namespace TheOtherRoles
                             RPCProcedure.uncheckedMurderPlayer(Sheriff.sheriff.Data.PlayerId, PlayerControl.LocalPlayer.PlayerId, Byte.MaxValue);
                         }
 
-                        MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
-                        killWriter.Write(Sheriff.sheriff.Data.PlayerId);
+						// Armored sheriff shot doesnt kill if backfired
+						if (targetId == Sheriff.sheriff.PlayerId && Helpers.checkArmored(Sheriff.sheriff, true, true))
+							return;
+						MessageWriter killWriter = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UncheckedMurderPlayer, Hazel.SendOption.Reliable, -1);
+						killWriter.Write(Sheriff.sheriff.Data.PlayerId);
                         killWriter.Write(targetId);
                         killWriter.Write(byte.MaxValue);
                         AmongUsClient.Instance.FinishRpcImmediately(killWriter);
@@ -944,13 +948,12 @@ namespace TheOtherRoles
                     RPCProcedure.trackerUsedTracker(Tracker.currentTarget.PlayerId);
                     SoundEffectsManager.play("trackerTrackPlayer");
                 },
-                () => { return Tracker.tracker != null && Tracker.tracker == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
-                () => { 
-                    if (!Tracker.usedTracker)
-                        showTargetNameOnButton(Tracker.currentTarget, trackerTrackPlayerButton, "");
-                    return PlayerControl.LocalPlayer.CanMove && Tracker.currentTarget != null && !Tracker.usedTracker; },
-                () => { if(Tracker.resetTargetAfterMeeting) Tracker.resetTracked(); },
-                Tracker.getButtonSprite(),
+				() => { return Tracker.tracker != null && Tracker.tracker == PlayerControl.LocalPlayer && !PlayerControl.LocalPlayer.Data.IsDead; },
+				() => { return PlayerControl.LocalPlayer.CanMove && Tracker.currentTarget != null && !Tracker.usedTracker; },
+				() => {
+					if (Tracker.resetTargetAfterMeeting) Tracker.resetTracked();
+					else if (Tracker.currentTarget != null && Tracker.currentTarget.Data.IsDead) Tracker.currentTarget = null;
+				}, Tracker.getButtonSprite(),
                 CustomButton.ButtonPositions.lowerRowRight,
                 __instance,
                 KeyCode.F
@@ -2048,11 +2051,11 @@ namespace TheOtherRoles
                 () => {
                     mediumButton.Timer = mediumButton.MaxTimer;
                     if (Medium.target == null || Medium.target.player == null) return;
-                    string msg = Medium.getInfo(Medium.target.player, Medium.target.killerIfExisting);
-                    FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, msg);
+					string msg = Medium.getInfo(Medium.target.player, Medium.target.killerIfExisting, Medium.target.deathReason);
+					FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, msg);
 
-                    // Ghost Info
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ShareGhostInfo, Hazel.SendOption.Reliable, -1);
+					// Ghost Info
+					MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ShareGhostInfo, Hazel.SendOption.Reliable, -1);
                     writer.Write(Medium.target.player.PlayerId);
                     writer.Write((byte)RPCProcedure.GhostInfoTypes.MediumInfo);
                     writer.Write(msg);
