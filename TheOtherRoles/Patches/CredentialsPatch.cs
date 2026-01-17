@@ -1,8 +1,9 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AmongUs.GameOptions;
+using HarmonyLib;
 using TheOtherRoles.CustomGameModes;
 using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Modifier;
@@ -34,7 +35,6 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 		{
 			static void Postfix(PingTracker __instance)
 			{
-				__instance.text.alignment = TextAlignmentOptions.TopRight;
 				var position = __instance.GetComponent<AspectPosition>();
 				if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
 				{
@@ -44,7 +44,9 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 					else if (PropHunt.isPropHuntGM) gameModeText = "Prop Hunt";
 					if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
 					__instance.text.text = $"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n{gameModeText}" + __instance.text.text;
-					position.DistanceFromEdge = new Vector3(2.25f, 0.11f, 0);
+					__instance.text.alignment = TextAlignmentOptions.Top;
+					position.Alignment = AspectPosition.EdgeAlignments.Top;
+					position.DistanceFromEdge = new Vector3(1.5f, 0.11f, 0);
 				}
 				else
 				{
@@ -52,11 +54,21 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
 					if (TORMapOptions.gameMode == CustomGamemodes.HideNSeek) gameModeText = $"Hide 'N Seek";
 					else if (TORMapOptions.gameMode == CustomGamemodes.Guesser) gameModeText = $"Guesser";
 					else if (TORMapOptions.gameMode == CustomGamemodes.PropHunt) gameModeText = $"Prop Hunt";
-					if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
+					if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText);
 
-					var host = $"Host: {GameData.Instance?.GetHost()?.PlayerName}";
-					__instance.text.text = $"{fullCredentialsVersion}\n  {gameModeText + fullCredentials}\n {host}\n {__instance.text.text}";
-					position.DistanceFromEdge = new Vector3(3.5f, 0.1f, 0);
+					__instance.text.text = $"{fullCredentialsVersion}\n{fullCredentials}\n {__instance.text.text}"; 
+					__instance.text.alignment = TextAlignmentOptions.TopLeft;
+					position.Alignment = AspectPosition.EdgeAlignments.LeftTop;
+					position.DistanceFromEdge = new Vector3(0.5f, 0.11f);
+
+					try
+					{
+						var GameModeText = GameObject.Find("GameModeText")?.GetComponent<TextMeshPro>();
+						GameModeText.text = gameModeText == "" ? (GameOptionsManager.Instance.currentGameOptions.GameMode == GameModes.HideNSeek ? "Van. HideNSeek" : "Classic") : gameModeText;
+						var ModeLabel = GameObject.Find("ModeLabel")?.GetComponentInChildren<TextMeshPro>();
+						ModeLabel.text = "Game Mode";
+					}
+					catch { }
 				}
 				position.AdjustPosition();
 			}

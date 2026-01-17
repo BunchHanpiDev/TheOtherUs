@@ -23,7 +23,7 @@ namespace TheOtherRoles.Patches {
     {
         static bool[] selections;
         static SpriteRenderer[] renderers;
-        private static GameData.PlayerInfo target = null;
+        private static NetworkedPlayerInfo target = null;
         private const float scale = 0.65f;
         private static TMPro.TextMeshPro meetingExtraButtonText;
         private static PassiveButton[] swapperButtonList;
@@ -97,10 +97,10 @@ namespace TheOtherRoles.Patches {
                     Dictionary<byte, int> self = CalculateVotes(__instance);
                     bool tie;
                     KeyValuePair<byte, int> max = self.MaxPair(out tie);
-                    GameData.PlayerInfo exiled = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(v => !tie && v.PlayerId == max.Key && !v.IsDead);
+                    NetworkedPlayerInfo exiled = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(v => !tie && v.PlayerId == max.Key && !v.IsDead);
 
                     // TieBreaker 
-                    List<GameData.PlayerInfo> potentialExiled = new List<GameData.PlayerInfo>();
+                    List<NetworkedPlayerInfo> potentialExiled = new List<NetworkedPlayerInfo>();
                     bool skipIsTie = false;
                     if (self.Count > 0)
                     {
@@ -162,7 +162,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.BloopAVoteIcon))]
         class MeetingHudBloopAVoteIconPatch
         {
-            public static bool Prefix(MeetingHud __instance, GameData.PlayerInfo voterPlayer, int index, Transform parent)
+            public static bool Prefix(MeetingHud __instance, NetworkedPlayerInfo voterPlayer, int index, Transform parent)
             {
                 var spriteRenderer = UnityEngine.Object.Instantiate<SpriteRenderer>(__instance.PlayerVotePrefab);
                 var showVoteColors = !GameManager.Instance.LogicOptions.GetAnonymousVotes() ||
@@ -232,7 +232,7 @@ namespace TheOtherRoles.Patches {
                     for (int j = 0; j < states.Length; j++)
                     {
                         MeetingHud.VoterState voterState = states[j];
-                        GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VoterId);
+                        NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(voterState.VoterId);
                         if (playerById == null)
                         {
                             Debug.LogError(string.Format("Couldn't find player info for voter: {0}", voterState.VoterId));
@@ -263,7 +263,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
         class MeetingHudVotingCompletedPatch
         {
-            static void Postfix(MeetingHud __instance, [HarmonyArgument(0)] byte[] states, [HarmonyArgument(1)] GameData.PlayerInfo exiled, [HarmonyArgument(2)] bool tie)
+            static void Postfix(MeetingHud __instance, [HarmonyArgument(0)] byte[] states, [HarmonyArgument(1)] NetworkedPlayerInfo exiled, [HarmonyArgument(2)] bool tie)
             {
                 // Reset swapper values
                 Swapper.playerId1 = Byte.MaxValue;
@@ -513,13 +513,13 @@ namespace TheOtherRoles.Patches {
                 if (HandleGuesser.isGuesserGm && CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor && !HandleGuesser.evilGuesserCanGuessSpy && roleInfo.roleId == RoleId.Spy) continue;
                 // remove all roles that cannot spawn due to the settings from the ui.
                 RoleManagerSelectRolesPatch.RoleAssignmentData roleData = RoleManagerSelectRolesPatch.getRoleAssignmentData();
-                //if (roleData.neutralSettings.ContainsKey((byte)roleInfo.roleId) && roleData.neutralSettings[(byte)roleInfo.roleId] == 0) continue;
-                //else if (roleData.impSettings.ContainsKey((byte)roleInfo.roleId) && roleData.impSettings[(byte)roleInfo.roleId] == 0) continue;
-                //else if (roleData.crewSettings.ContainsKey((byte)roleInfo.roleId) && roleData.crewSettings[(byte)roleInfo.roleId] == 0) continue;
-                //else if (new List<RoleId>() { RoleId.Janitor, RoleId.Godfather, RoleId.Mafioso }.Contains(roleInfo.roleId) && CustomOptionHolder.mafiaSpawnRate.getSelection() == 0) continue;
-                //else if (roleInfo.roleId == RoleId.Sidekick && (!CustomOptionHolder.jackalCanCreateSidekick.getBool() || CustomOptionHolder.jackalSpawnRate.getSelection() == 0)) continue;
-                //if (roleInfo.roleId == RoleId.Deputy && (CustomOptionHolder.deputySpawnRate.getSelection() == 0 || CustomOptionHolder.sheriffSpawnRate.getSelection() == 0)) continue;
-                if (roleInfo.roleId == RoleId.Pursuer && CustomOptionHolder.lawyerSpawnRate.getSelection() == 0) continue;
+				//if (roleData.neutralSettings.ContainsKey((byte)roleInfo.roleId) && roleData.neutralSettings[(byte)roleInfo.roleId] == 0) continue;
+				//else if (roleData.impSettings.ContainsKey((byte)roleInfo.roleId) && roleData.impSettings[(byte)roleInfo.roleId] == 0) continue;
+				//else if (roleData.crewSettings.ContainsKey((byte)roleInfo.roleId) && roleData.crewSettings[(byte)roleInfo.roleId] == 0) continue;
+				//else if (new List<RoleId>() { RoleId.Janitor, RoleId.Godfather, RoleId.Mafioso }.Contains(roleInfo.roleId) && (CustomOptionHolder.mafiaSpawnRate.getSelection() == 0 || GameOptionsManager.Instance.currentGameOptions.NumImpostors < 3)) continue;
+				//else if (roleInfo.roleId == RoleId.Sidekick && (!CustomOptionHolder.jackalCanCreateSidekick.getBool() || CustomOptionHolder.jackalSpawnRate.getSelection() == 0)) continue;
+				//if (roleInfo.roleId == RoleId.Deputy && (CustomOptionHolder.deputySpawnRate.getSelection() == 0 || CustomOptionHolder.sheriffSpawnRate.getSelection() == 0)) continue;
+				if (roleInfo.roleId == RoleId.Pursuer && CustomOptionHolder.lawyerSpawnRate.getSelection() == 0) continue;
                 if (roleInfo.roleId == RoleId.Spy && roleData.impostors.Count <= 1) continue;
                 //if (roleInfo.roleId == RoleId.Prosecutor && (CustomOptionHolder.lawyerIsProsecutorChance.getSelection() == 0 || CustomOptionHolder.lawyerSpawnRate.getSelection() == 0)) continue;
                 //if (roleInfo.roleId == RoleId.Lawyer && (CustomOptionHolder.lawyerIsProsecutorChance.getSelection() == 10 || CustomOptionHolder.lawyerSpawnRate.getSelection() == 0)) continue;
@@ -787,7 +787,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
         class StartMeetingPatch
         {
-            public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo meetingTarget)
+            public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo meetingTarget)
             {
                 RoomTracker roomTracker = FastDestroyableSingleton<HudManager>.Instance?.roomTracker;
                 byte roomId = Byte.MinValue;

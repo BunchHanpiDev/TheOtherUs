@@ -20,10 +20,11 @@ namespace TheOtherRoles.Patches
             new("Ghosts Can Additionally See Modifier", () => TORMapOptions.ghostsSeeModifier = TheOtherRolesPlugin.GhostsSeeModifier.Value = !TheOtherRolesPlugin.GhostsSeeModifier.Value, TheOtherRolesPlugin.GhostsSeeModifier.Value),
             new("Show Role Summary", () => TORMapOptions.showRoleSummary = TheOtherRolesPlugin.ShowRoleSummary.Value = !TheOtherRolesPlugin.ShowRoleSummary.Value, TheOtherRolesPlugin.ShowRoleSummary.Value),
             new("Show Lighter / Darker", () => TORMapOptions.showLighterDarker = TheOtherRolesPlugin.ShowLighterDarker.Value = !TheOtherRolesPlugin.ShowLighterDarker.Value, TheOtherRolesPlugin.ShowLighterDarker.Value),
-            new SelectionBehaviour("Better Cursor", () => TORMapOptions.toggleCursor = TheOtherRolesPlugin.ToggleCursor.Value = !TheOtherRolesPlugin.ToggleCursor.Value, TheOtherRolesPlugin.ToggleCursor.Value),
+            new("Better Cursor", () => TORMapOptions.toggleCursor = TheOtherRolesPlugin.ToggleCursor.Value = !TheOtherRolesPlugin.ToggleCursor.Value, TheOtherRolesPlugin.ToggleCursor.Value, "Cursor"),
             new("Enable Sound Effects", () => TORMapOptions.enableSoundEffects = TheOtherRolesPlugin.EnableSoundEffects.Value = !TheOtherRolesPlugin.EnableSoundEffects.Value, TheOtherRolesPlugin.EnableSoundEffects.Value),
             new("Show Vents On Map", () => TORMapOptions.ShowVentsOnMap = TheOtherRolesPlugin.ShowVentsOnMap.Value = !TheOtherRolesPlugin.ShowVentsOnMap.Value, TheOtherRolesPlugin.ShowVentsOnMap.Value),
-        };
+			new("Show Chat Notifications", () => TORMapOptions.ShowChatNotifications = TheOtherRolesPlugin.ShowChatNotifications.Value = !TheOtherRolesPlugin.ShowChatNotifications.Value, TheOtherRolesPlugin.ShowChatNotifications.Value),
+		};
         
         private static GameObject popUp;
         private static TextMeshPro titleText;
@@ -185,7 +186,7 @@ namespace TheOtherRoles.Patches
 
                 passiveButton.OnClick.AddListener((Action) (() =>
                 {
-                    if(info.Title == "Better Cursor") {
+                    if(info.ShoutName == "Cursor") {
                         Helpers.enableCursor(false);                  
                     }
                     button.onState = info.OnClick();
@@ -212,14 +213,17 @@ namespace TheOtherRoles.Patches
         {
             public string Title;
             public Func<bool> OnClick;
-            public bool DefaultValue;
+			public bool DefaultValue;
+			public string ShoutName;
 
-            public SelectionBehaviour(string title, Func<bool> onClick, bool defaultValue)
+			public SelectionBehaviour(string title, Func<bool> onClick, bool defaultValue, string shoutName = "Common")
             {
                 Title = title;
                 OnClick = onClick;
                 DefaultValue = defaultValue;
-            }
+                ShoutName = shoutName; // Fix Cursor change(language)
+
+			}
         }
     }
 }

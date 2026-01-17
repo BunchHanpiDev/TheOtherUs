@@ -26,7 +26,8 @@ namespace TheOtherRoles{
         public static bool transparentTasks = false;
         public static bool hideOutOfSightNametags = false;
         public static bool ShowVentsOnMap = true;
-        public static bool disableMedscanWalking = false;
+		public static bool ShowChatNotifications = true;
+		public static bool disableMedscanWalking = false;
         public static int restrictDevices = 0;
        // public static float restrictAdminTime = 600f;
         //public static float restrictAdminTimeMax = 600f;
@@ -89,9 +90,10 @@ namespace TheOtherRoles{
             enableSoundEffects = TheOtherRolesPlugin.EnableSoundEffects.Value;
             enableHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
             ShowVentsOnMap = TheOtherRolesPlugin.ShowVentsOnMap.Value;
-            
-            //Patches.ShouldAlwaysHorseAround.isHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
-        }
+			ShowChatNotifications = TheOtherRolesPlugin.ShowChatNotifications.Value;
+
+			//Patches.ShouldAlwaysHorseAround.isHorseMode = TheOtherRolesPlugin.EnableHorseMode.Value;
+		}
     public static void resetDeviceTimes() {
             //restrictAdminTime = restrictAdminTimeMax;
             restrictCamerasTime = restrictCamerasTimeMax;

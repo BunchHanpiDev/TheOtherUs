@@ -19,8 +19,8 @@ public class CachedPlayer
 	public PlayerPhysics PlayerPhysics;
 	public CustomNetworkTransform NetTransform;
 
-	// 直接引用 PlayerControl 的属性，不再储存副本
-	public GameData.PlayerInfo Data => PlayerControl?.Data;
+	// Use PlayerControl，no chached
+	public NetworkedPlayerInfo Data => PlayerControl?.Data;
 	public byte PlayerId => PlayerControl?.PlayerId ?? byte.MaxValue;
 
 	public static implicit operator bool(CachedPlayer player)
@@ -87,7 +87,7 @@ public static class CachedPlayerPatches
 		CachedPlayer.PlayerPtrs.Remove(__instance.Pointer);
 	}
 
-	// 移除了以下补丁，因为不再需要更新 Data 和 PlayerId
+	// Remove fix，no need update Data and PlayerId
 	// [HarmonyPatch(typeof(GameData), nameof(GameData.Deserialize))]
 	// [HarmonyPatch(typeof(GameData), nameof(GameData.AddPlayer))]
 	// [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Deserialize))]

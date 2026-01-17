@@ -13,7 +13,7 @@ namespace TheOtherRoles {
         public static string[] presets = new string[]{"Preset 1", "Preset 2", "Random Preset Skeld", "Random Preset Mira HQ", "Random Preset Polus", "Random Preset Airship", "Random Preset Submerged" };
 
         public static CustomOption presetSelection;
-        public static CustomOption activateRoles;
+        // public static CustomOption activateRoles;
         public static CustomOption crewmateRolesCountMin;
         public static CustomOption crewmateRolesCountMax;
         public static CustomOption crewmateRolesFill;
@@ -563,23 +563,22 @@ namespace TheOtherRoles {
 
             // Role Options
             presetSelection = CustomOption.Create(0, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Preset"), presets, null, true);
-            activateRoles = CustomOption.Create(1, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Enable Mod Roles And Block Vanilla Roles"), true, null, true);
-			anyPlayerCanStopStart = CustomOption.Create(2, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Any Player Can Stop The Start"), false, null, false);
+            // activateRoles = CustomOption.Create(1, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Enable Mod Roles And Block Vanilla Roles"), true, null, true);
 
 			if (Utilities.EventUtility.canBeEnabled) enableEventMode = CustomOption.Create(10423, Types.General, cs(Color.green, "Enable Special Mode"), true, null, true);
-			
-            // Using new id's for the options to not break compatibilty with older versions
-			crewmateRolesCountMin = CustomOption.Create(300, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Crewmate Roles"), 15f, 0f, 15f, 1f, null, true);
-            crewmateRolesCountMax = CustomOption.Create(301, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Crewmate Roles"), 15f, 0f, 15f, 1f);
-            crewmateRolesFill = CustomOption.Create(308, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Fill Crewmate Roles\n(Ignores Min/Max)"), false);
+
+			// Using new id's for the options to not break compatibilty with older versions
+			crewmateRolesCountMin = CustomOption.Create(300, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Crewmate Roles"), 15f, 0f, 15f, 1f, null, true, heading: "Min/Max Roles");
+			crewmateRolesCountMax = CustomOption.Create(301, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Crewmate Roles"), 15f, 0f, 15f, 1f); 
             neutralRolesCountMin = CustomOption.Create(302, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Neutral Roles"), 15f, 0f, 15f, 1f);
             neutralRolesCountMax = CustomOption.Create(303, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Neutral Roles"), 15f, 0f, 15f, 1f);
             impostorRolesCountMin = CustomOption.Create(304, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Impostor Roles"), 15f, 0f, 15f, 1f);
             impostorRolesCountMax = CustomOption.Create(305, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Impostor Roles"), 15f, 0f, 15f, 1f);
             modifiersCountMin = CustomOption.Create(306, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Modifiers"), 15f, 0f, 15f, 1f);
             modifiersCountMax = CustomOption.Create(307, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Maximum Modifiers"), 15f, 0f, 15f, 1f);
+			crewmateRolesFill = CustomOption.Create(308, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Fill Crewmate Roles\n(Ignores Min/Max)"), false);
 
-            modifierAssassin = CustomOption.Create(2000, Types.Impostor, cs(Color.red, "Assassin"), rates, null, true);
+			modifierAssassin = CustomOption.Create(2000, Types.Impostor, cs(Color.red, "Assassin"), rates, null, true);
             modifierAssassinQuantity = CustomOption.Create(2001, Types.Impostor, cs(Color.red, "Assassin Quantity"), ratesModifier, modifierAssassin);
             modifierAssassinNumberOfShots = CustomOption.Create(2002, Types.Impostor, "Number Of Shots", 5f, 1f, 15f, 1f, modifierAssassin);
             modifierAssassinMultipleShotsPerMeeting = CustomOption.Create(2003, Types.Impostor, "Can Shoot Multiple Times Per Meeting", true, modifierAssassin);
@@ -917,10 +916,10 @@ namespace TheOtherRoles {
             trapperInfoType = CustomOption.Create(453, Types.Crewmate, "Trap Information Type", new string[] { "Role", "Good/Evil Role", "Name" }, trapperSpawnRate);
             trapperTrapDuration = CustomOption.Create(454, Types.Crewmate, "Trap Duration", 5f, 1f, 15f, 1f, trapperSpawnRate);
 
-            // Modifier (1000 - 1999)
-            modifiersAreHidden = CustomOption.Create(1009, Types.Modifier, cs(Color.yellow, "Hide After Death Modifiers"), true, null, true);
+			// Modifier (1000 - 1999)
+			modifiersAreHidden = CustomOption.Create(1009, Types.Modifier, cs(Color.yellow, "VIP, Bait & Bloody Are Hidden"), true, null, true, heading: cs(Color.yellow, "Hide After Death Modifiers"));
 
-            modifierDisperser = CustomOption.Create(200220, Types.Modifier, cs(Color.red, "Disperser"), rates, null, true);
+			modifierDisperser = CustomOption.Create(200220, Types.Modifier, cs(Color.red, "Disperser"), rates, null, true);
 
             modifierBloody = CustomOption.Create(1000, Types.Modifier, cs(Color.yellow, "Bloody"), rates, null, true);
             modifierBloodyQuantity = CustomOption.Create(1001, Types.Modifier, cs(Color.yellow, "Bloody Quantity"), ratesModifier, modifierBloody);
@@ -986,14 +985,14 @@ namespace TheOtherRoles {
 
             modifierShifter = CustomOption.Create(1100, Types.Modifier, cs(Color.yellow, "Shifter"), rates, null, true);
 
-            // Guesser Gamemode (2000 - 2999)
-            guesserGamemodeCrewNumber = CustomOption.Create(2001, Types.Guesser, cs(Guesser.color, "Number of Crew Guessers"), 15f, 1f, 15f, 1f, null, true);
-            guesserGamemodeNeutralNumber = CustomOption.Create(2002, Types.Guesser, cs(Guesser.color, "Number of Neutral Guessers"), 15f, 1f, 15f, 1f, null, true);
-            guesserGamemodeImpNumber = CustomOption.Create(2003, Types.Guesser, cs(Guesser.color, "Number of Impostor Guessers"), 15f, 1f, 15f, 1f, null, true);
-            guesserForceJackalGuesser = CustomOption.Create(2007, Types.Guesser, "Force Jackal Guesser", false, null, true);
-			guesserGamemodeSidekickIsAlwaysGuesser = CustomOption.Create(2012, Types.Guesser, "Sidekick Is Always Guesser", false, null);
-			guesserForceThiefGuesser = CustomOption.Create(2011, Types.Guesser, "Force Thief Guesser", false, null, true);
-            guesserGamemodeHaveModifier = CustomOption.Create(2004, Types.Guesser, "Guessers Can Have A Modifier", true, null);
+			// Guesser Gamemode (2000 - 2999)
+			guesserGamemodeCrewNumber = CustomOption.Create(2001, Types.Guesser, cs(Guesser.color, "Number of Crew Guessers"), 15f, 1f, 15f, 1f, null, true, heading: "Amount of Guessers");
+			guesserGamemodeNeutralNumber = CustomOption.Create(2002, Types.Guesser, cs(Guesser.color, "Number of Neutral Guessers"), 15f, 1f, 15f, 1f, null);
+			guesserGamemodeImpNumber = CustomOption.Create(2003, Types.Guesser, cs(Guesser.color, "Number of Impostor Guessers"), 15f, 1f, 15f, 1f, null);
+			guesserForceJackalGuesser = CustomOption.Create(2007, Types.Guesser, "Force Jackal Guesser", false, null, true, heading: "Force Guessers"); 
+            guesserGamemodeSidekickIsAlwaysGuesser = CustomOption.Create(2012, Types.Guesser, "Sidekick Is Always Guesser", false, null);
+			guesserForceThiefGuesser = CustomOption.Create(2011, Types.Guesser, "Force Thief Guesser", false, null);
+			guesserGamemodeHaveModifier = CustomOption.Create(2004, Types.Guesser, "Guessers Can Have A Modifier", true, null, true, heading: "General Guesser Settings");
             guesserGamemodeNumberOfShots = CustomOption.Create(2005, Types.Guesser, "Guesser Number Of Shots", 3f, 1f, 15f, 1f, null);
             guesserGamemodeHasMultipleShotsPerMeeting = CustomOption.Create(2006, Types.Guesser, "Guesser Can Shoot Multiple Times Per Meeting", false, null);
             guesserGamemodeKillsThroughShield = CustomOption.Create(2008, Types.Guesser, "Guesses Ignore The Medic Shield", true, null);
@@ -1016,7 +1015,7 @@ namespace TheOtherRoles {
             hideNSeekCanSabotage = CustomOption.Create(3019, Types.HideNSeekMain, cs(Color.yellow, "Enable Sabotages"), false);
             hideNSeekHunterWaiting = CustomOption.Create(3022, Types.HideNSeekMain, cs(Color.yellow, "Time The Hunter Needs To Wait"), 15f, 2.5f, 60f, 2.5f);
 
-            hunterLightCooldown = CustomOption.Create(3005, Types.HideNSeekRoles, cs(Color.red, "Hunter Light Cooldown"), 30f, 5f, 60f, 1f, null, true);
+            hunterLightCooldown = CustomOption.Create(3005, Types.HideNSeekRoles, cs(Color.red, "Hunter Light Cooldown"), 30f, 5f, 60f, 1f, null, true, heading: "Hunter Lights Settings");
             hunterLightDuration = CustomOption.Create(3006, Types.HideNSeekRoles, cs(Color.red, "Hunter Light Duration"), 5f, 1f, 60f, 1f);
             hunterLightVision = CustomOption.Create(3007, Types.HideNSeekRoles, cs(Color.red, "Hunter Light Vision"), 3f, 1f, 5f, 0.25f);
             hunterLightPunish = CustomOption.Create(3008, Types.HideNSeekRoles, cs(Color.red, "Hunter Light Punish In Sec"), 5f, 0f, 30f, 1f);
@@ -1027,20 +1026,20 @@ namespace TheOtherRoles {
             hunterArrowDuration = CustomOption.Create(3013, Types.HideNSeekRoles, cs(Color.red, "Hunter Arrow Duration"), 5f, 0f, 60f, 1f);
             hunterArrowPunish = CustomOption.Create(3014, Types.HideNSeekRoles, cs(Color.red, "Hunter Arrow Punish In Sec"), 5f, 0f, 30f, 1f);
 
-            huntedShieldCooldown = CustomOption.Create(3015, Types.HideNSeekRoles, cs(Color.gray, "Hunted Shield Cooldown"), 30f, 5f, 60f, 1f, null, true);
+            huntedShieldCooldown = CustomOption.Create(3015, Types.HideNSeekRoles, cs(Color.gray, "Hunted Shield Cooldown"), 30f, 5f, 60f, 1f, null, true, heading: "Hunter Shields Settings");
             huntedShieldDuration = CustomOption.Create(3016, Types.HideNSeekRoles, cs(Color.gray, "Hunted Shield Duration"), 5f, 1f, 60f, 1f);
             huntedShieldRewindTime = CustomOption.Create(3018, Types.HideNSeekRoles, cs(Color.gray, "Hunted Rewind Time"), 3f, 1f, 10f, 1f);
             huntedShieldNumber = CustomOption.Create(3026, Types.HideNSeekRoles, cs(Color.gray, "Hunted Shield Number"), 3f, 1f, 15f, 1f);
 
             // Prop Hunt General Options
             propHuntMap = CustomOption.Create(4020, Types.PropHunt, cs(Color.yellow, "Map"), new string[] { "The Skeld", "Mira", "Polus", "Airship", "Fungle", "Submerged", "LI Map"}, null, true, onChange: ()=> { int map = propHuntMap.selection; if (map >= 3) map++; GameOptionsManager.Instance.currentNormalGameOptions.MapId = (byte)map;});
-            propHuntTimer = CustomOption.Create(4021, Types.PropHunt, cs(Color.yellow, "Timer In Min"), 5f, 1f, 30f, 0.5f);
-            propHuntUnstuckCooldown = CustomOption.Create(4011, Types.PropHunt, cs(Color.yellow, "Unstuck Cooldown"), 30f, 2.5f, 60f, 2.5f);
+			propHuntTimer = CustomOption.Create(4021, Types.PropHunt, cs(Color.yellow, "Timer In Min"), 5f, 1f, 30f, 0.5f, null, true, heading: "General PropHunt Settings");
+			propHuntUnstuckCooldown = CustomOption.Create(4011, Types.PropHunt, cs(Color.yellow, "Unstuck Cooldown"), 30f, 2.5f, 60f, 2.5f);
             propHuntUnstuckDuration = CustomOption.Create(4012, Types.PropHunt, cs(Color.yellow, "Unstuck Duration"), 2f, 1f, 60f, 1f);
             propHunterVision = CustomOption.Create(4006, Types.PropHunt, cs(Color.yellow, "Hunter Vision"), 0.5f, 0.25f, 2f, 0.25f);
             propVision = CustomOption.Create(4007, Types.PropHunt, cs(Color.yellow, "Prop Vision"), 2f, 0.25f, 5f, 0.25f);
-            // Hunter Options
-            propHuntNumberOfHunters = CustomOption.Create(4000, Types.PropHunt, cs(Color.red, "Number Of Hunters"), 1f, 1f, 5f, 1f, null, true);
+			// Hunter Options
+			propHuntNumberOfHunters = CustomOption.Create(4000, Types.PropHunt, cs(Color.red, "Number Of Hunters"), 1f, 1f, 5f, 1f, null, true, heading: "Hunter Settings");
             hunterInitialBlackoutTime = CustomOption.Create(4001, Types.PropHunt, cs(Color.red, "Hunter Initial Blackout Duration"), 10f, 5f, 20f, 1f);
             hunterMissCooldown = CustomOption.Create(4004, Types.PropHunt, cs(Color.red, "Kill Cooldown After Miss"), 10f, 2.5f, 60f, 2.5f);
             hunterHitCooldown = CustomOption.Create(4005, Types.PropHunt, cs(Color.red, "Kill Cooldown After Hit"), 10f, 2.5f, 60f, 2.5f);
@@ -1050,8 +1049,8 @@ namespace TheOtherRoles {
             propHuntAdminCooldown = CustomOption.Create(4022, Types.PropHunt, cs(Color.red, "Hunter Admin Cooldown"), 30f, 2.5f, 1800f, 2.5f);
             propHuntFindCooldown = CustomOption.Create(4023, Types.PropHunt, cs(Color.red, "Find Cooldown"), 60f, 2.5f, 1800f, 2.5f);
             propHuntFindDuration = CustomOption.Create(4024, Types.PropHunt, cs(Color.red, "Find Duration"), 5f, 1f, 15f, 1f);
-            // Prop Options
-            propBecomesHunterWhenFound = CustomOption.Create(4003, Types.PropHunt, cs(Palette.CrewmateBlue, "Props Become Hunters When Found"), false, null, true);
+			// Prop Options
+			propBecomesHunterWhenFound = CustomOption.Create(4003, Types.PropHunt, cs(Palette.CrewmateBlue, "Props Become Hunters When Found"), false, null, true, heading: "Prop Settings");
             propHuntInvisEnabled = CustomOption.Create(4013, Types.PropHunt, cs(Palette.CrewmateBlue, "Invisibility Enabled"), true, null, true);
             propHuntInvisCooldown = CustomOption.Create(4014, Types.PropHunt, cs(Palette.CrewmateBlue, "Invisibility Cooldown"), 120f, 10f, 1800f, 2.5f, propHuntInvisEnabled);
             propHuntInvisDuration = CustomOption.Create(4015, Types.PropHunt, cs(Palette.CrewmateBlue, "Invisibility Duration"), 5f, 1f, 30f, 1f, propHuntInvisEnabled);
@@ -1062,8 +1061,9 @@ namespace TheOtherRoles {
 
 
 
-            // Other options
-            maxNumberOfMeetings = CustomOption.Create(3, Types.General, "Number Of Meetings (excluding Mayor meeting)", 10, 0, 15, 1, null, true);
+			// Other options
+			maxNumberOfMeetings = CustomOption.Create(3, Types.General, "Number Of Meetings (excluding Mayor meeting)", 10, 0, 15, 1, null, true, heading: "Gameplay Settings");
+			anyPlayerCanStopStart = CustomOption.Create(2, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Any Player Can Stop The Start"), false, null, false);
             blockSkippingInEmergencyMeetings = CustomOption.Create(4, Types.General, "Block Skipping In Emergency Meetings", false);
             noVoteIsSelfVote = CustomOption.Create(5, Types.General, "No Vote Is Self Vote", false, blockSkippingInEmergencyMeetings);
             hidePlayerNames = CustomOption.Create(6, Types.General, "Hide Player Names", false);
@@ -1072,13 +1072,13 @@ namespace TheOtherRoles {
             hideOutOfSightNametags = CustomOption.Create(6006, Types.General, "Hide Obstructed Player Names", false);
             hideVentAnimOnShadows = CustomOption.Create(822445, Types.General, "Hide Vent Animation Out Of Vision", false);
             finishTasksBeforeHauntingOrZoomingOut = CustomOption.Create(9, Types.General, "Finish Tasks Before Haunting Or Zooming Out", true);
-            camsNightVision = CustomOption.Create(11, Types.General, "Cams Switch To Night Vision If Lights Are Off", false, null, true);
+			deadImpsBlockSabotage = CustomOption.Create(13, Types.General, "Block Dead Impostor From Sabotaging", false, null, false);
+			camsNightVision = CustomOption.Create(11, Types.General, "Cams Switch To Night Vision If Lights Are Off", false, null, true, heading: "Night Vision Cams");
             camsNoNightVisionIfImpVision = CustomOption.Create(12, Types.General, "Impostor Vision Ignores Night Vision Cams", false, camsNightVision, false);
-			deadImpsBlockSabotage = CustomOption.Create(13, Types.General, cs(Palette.ImpostorRed, "Block Dead Impostor From Sabotaging"), false, null, false);
 			impostorSeeRoles = CustomOption.Create(9, Types.General, "Impostors Can See The Roles Of Their Team", false);
             transparentTasks = CustomOption.Create(814142, Types.General, "Tasks Are Transparent", false);
-            dynamicMap = CustomOption.Create(500, Types.General, "Play On A Random Map", false, null, true);
-            dynamicMapEnableSkeld = CustomOption.Create(501, Types.General, "Skeld", rates, dynamicMap, false);
+
+			dynamicMap = CustomOption.Create(500, Types.General, "Play On A Random Map", false, null, true, heading: "Random Maps"); dynamicMapEnableSkeld = CustomOption.Create(501, Types.General, "Skeld", rates, dynamicMap, false);
             dynamicMapEnableMira = CustomOption.Create(502, Types.General, "Mira", rates, dynamicMap, false);
             dynamicMapEnablePolus = CustomOption.Create(503, Types.General, "Polus", rates, dynamicMap, false);
             dynamicMapEnableAirShip = CustomOption.Create(504, Types.General, "Airship", rates, dynamicMap, false);

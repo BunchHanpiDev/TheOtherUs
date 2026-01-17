@@ -55,7 +55,8 @@ namespace TheOtherRoles
         public static ConfigEntry<bool> EnableHorseMode { get; set; }
         public static ConfigEntry<bool> ToggleCursor { get; set; }
         public static ConfigEntry<bool> ShowVentsOnMap { get; set; }
-        public static ConfigEntry<string> Ip { get; set; }
+		public static ConfigEntry<bool> ShowChatNotifications { get; set; }
+		public static ConfigEntry<string> Ip { get; set; }
         public static ConfigEntry<ushort> Port { get; set; }
         public static ConfigEntry<string> ShowPopUpVersion { get; set; }
 
@@ -108,14 +109,15 @@ namespace TheOtherRoles
             EnableHorseMode = Config.Bind("Custom", "Enable Horse Mode", false);
             ShowPopUpVersion = Config.Bind("Custom", "Show PopUp", "0");
             ShowVentsOnMap = Config.Bind("Custom", "Show vent positions on minimap", false);
-            
-            Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
+			ShowChatNotifications = Config.Bind("Custom", "Show Chat Notifications", true);
+
+			Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
             Port = Config.Bind("Custom", "Custom Server Port", (ushort)22023);
             defaultRegions = ServerManager.DefaultRegions;
+			// Removes vanilla Servers
+			ServerManager.DefaultRegions = new Il2CppReferenceArray<IRegionInfo>(new IRegionInfo[0]);
+			UpdateRegions();
 
-            UpdateRegions();
-
-            DebugMode = Config.Bind("Custom", "Enable Debug Mode", "false");
             Harmony.PatchAll();
             
             CustomOptionHolder.Load();
@@ -186,7 +188,7 @@ namespace TheOtherRoles
                 var i = playerControl.PlayerId = (byte) GameData.Instance.GetAvailableId();
 
                 bots.Add(playerControl);
-                GameData.Instance.AddPlayer(playerControl);
+                GameData.Instance.AddDummy(playerControl);
                 AmongUsClient.Instance.Spawn(playerControl, -2, InnerNet.SpawnFlags.None);
                 
                 playerControl.transform.position = CachedPlayer.LocalPlayer.transform.position;
@@ -194,8 +196,8 @@ namespace TheOtherRoles
                 playerControl.NetTransform.enabled = false;
                 playerControl.SetName(RandomString(10));
                 playerControl.SetColor((byte) random.Next(Palette.PlayerColors.Length));
-                GameData.Instance.RpcSetTasks(playerControl.PlayerId, new byte[0]);
-            }
+				playerControl.Data.RpcSetTasks(new byte[0]);
+			}
 
             // Terminate round
             if(AmongUsClient.Instance.AmHost && Helpers.gameStarted && Input.GetKeyDown(KeyCode.Return) && Input.GetKey(KeyCode.L) && Input.GetKey(KeyCode.LeftShift)) {

@@ -82,7 +82,6 @@ namespace TheOtherRoles.Objects
 
 				if (current.timeRemaining < 0 && !current.permanent)
 				{
-					TheOtherRolesPlugin.Logger.LogMessage($"update: permanent: {current.permanent}, time: {current.timeRemaining}");
 					current.gameObject.SetActive(false);
 					UnityEngine.Object.Destroy(current.gameObject);
 					silhouettes.Remove(current);
