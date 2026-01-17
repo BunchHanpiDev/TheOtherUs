@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Utilities;

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Impostor;
 
 namespace TheOtherRoles.Patches
@@ -19,7 +18,7 @@ namespace TheOtherRoles.Patches
 
         static void updateUndertakerMoveSpeed(PlayerPhysics playerPhysics)
         {
-            if (Undertaker.undertaker == null || Undertaker.undertaker != CachedPlayer.LocalPlayer.PlayerControl) return;
+            if (Undertaker.undertaker == null || Undertaker.undertaker != PlayerControl.LocalPlayer) return;
             if(Undertaker.deadBodyDraged != null )
             {
                 if (playerPhysics.AmOwner && GameData.Instance && playerPhysics.myPlayer.CanMove)

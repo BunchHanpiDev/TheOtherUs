@@ -1,5 +1,4 @@
-﻿using TheOtherRoles.Players;
-using TheOtherRoles.Roles.Impostor;
+﻿using TheOtherRoles.Roles.Impostor;
 using UnityEngine;
 
 namespace TheOtherRoles.Roles.Crewmate
@@ -47,10 +46,10 @@ namespace TheOtherRoles.Roles.Crewmate
 			if (Medic.shielded != null && ((target == Medic.shielded && !isMorphedMorphling) || (isMorphedMorphling && Morphling.morphTarget == Medic.shielded)))
 			{
 				hasVisibleShield = Medic.showShielded == 0 || Helpers.shouldShowGhostInfo() // Everyone or Ghost info
-					|| (Medic.showShielded == 1 && (CachedPlayer.LocalPlayer.PlayerControl == Medic.shielded || CachedPlayer.LocalPlayer.PlayerControl == Medic.medic)) // Shielded + Medic
-					|| (Medic.showShielded == 2 && CachedPlayer.LocalPlayer.PlayerControl == Medic.medic); // Medic only
+					|| (Medic.showShielded == 1 && (PlayerControl.LocalPlayer == Medic.shielded || PlayerControl.LocalPlayer == Medic.medic)) // Shielded + Medic
+					|| (Medic.showShielded == 2 && PlayerControl.LocalPlayer == Medic.medic); // Medic only
 																										   // Make shield invisible till after the next meeting if the option is set (the medic can already see the shield)
-				hasVisibleShield = hasVisibleShield && (Medic.meetingAfterShielding || !Medic.showShieldAfterMeeting || CachedPlayer.LocalPlayer.PlayerControl == Medic.medic || Helpers.shouldShowGhostInfo());
+				hasVisibleShield = hasVisibleShield && (Medic.meetingAfterShielding || !Medic.showShieldAfterMeeting || PlayerControl.LocalPlayer == Medic.medic || Helpers.shouldShowGhostInfo());
 			}
 			return hasVisibleShield;
 		}

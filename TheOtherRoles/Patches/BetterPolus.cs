@@ -2,7 +2,6 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using static TheOtherRoles.TheOtherRoles;
-using TheOtherRoles.Players;
 
 
 namespace TheOtherRoles.Patches

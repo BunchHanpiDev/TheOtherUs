@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Utilities;
@@ -84,7 +83,7 @@ namespace TheOtherRoles.Objects {
 
         public Portal(Vector2 p) {
             portalGameObject = new GameObject("Portal"){ layer = 11 };
-            //Vector3 position = new Vector3(p.x, p.y, CachedPlayer.LocalPlayer.transform.position.z + 1f);
+            //Vector3 position = new Vector3(p.x, p.y, PlayerControl.LocalPlayer.transform.position.z + 1f);
             Vector3 position = new Vector3(p.x, p.y, p.y / 1000f + 0.01f);
 
             // Create the portal            
@@ -102,7 +101,7 @@ namespace TheOtherRoles.Objects {
             animationFgRenderer.material = FastDestroyableSingleton<HatManager>.Instance.PlayerMaterial;
 
             // Only render the inactive portals for the Portalmaker
-            bool playerIsPortalmaker = CachedPlayer.LocalPlayer.PlayerControl == Portalmaker.portalmaker;
+            bool playerIsPortalmaker = PlayerControl.LocalPlayer == Portalmaker.portalmaker;
             portalGameObject.SetActive(playerIsPortalmaker);
             portalFgAnimationGameObject.SetActive(true);
 

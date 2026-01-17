@@ -1,17 +1,14 @@
-using System.Linq;
 using System;
 using System.Collections.Generic;
-using TheOtherRoles.Players;
-using static TheOtherRoles.TheOtherRoles;
-using UnityEngine;
-using TheOtherRoles.Utilities;
-using TheOtherRoles.CustomGameModes;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Roles.Modifier;
 using TheOtherRoles.Roles.Neutral;
+using TheOtherRoles.Utilities;
+using UnityEngine;
 
 namespace TheOtherRoles
 {
@@ -332,14 +329,14 @@ namespace TheOtherRoles
         public static String GetRolesString(PlayerControl p, bool useColors, bool showModifier = true, bool suppressGhostInfo = false) {
             string roleName;
             roleName = String.Join(" ", getRoleInfoForPlayer(p, showModifier).Select(x => useColors ? Helpers.cs(x.color, x.name) : x.name).ToArray());
-            if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && CachedPlayer.LocalPlayer.PlayerControl != Lawyer.target) 
+            if (Lawyer.target != null && p.PlayerId == Lawyer.target.PlayerId && PlayerControl.LocalPlayer != Lawyer.target) 
                 roleName += (useColors ? Helpers.cs(Pursuer.color, " §") : " §");
             if (HandleGuesser.isGuesserGm && HandleGuesser.isGuesser(p.PlayerId)) roleName += " (Guesser)";
 
             if (!suppressGhostInfo && p != null) {
-                if (p == Shifter.shifter && (CachedPlayer.LocalPlayer.PlayerControl == Shifter.shifter || Helpers.shouldShowGhostInfo()) && Shifter.futureShift != null)
+                if (p == Shifter.shifter && (PlayerControl.LocalPlayer == Shifter.shifter || Helpers.shouldShowGhostInfo()) && Shifter.futureShift != null)
                     roleName += Helpers.cs(Color.yellow, " ← " + Shifter.futureShift.Data.PlayerName);
-                if (p == Vulture.vulture && (CachedPlayer.LocalPlayer.PlayerControl == Vulture.vulture || Helpers.shouldShowGhostInfo()))
+                if (p == Vulture.vulture && (PlayerControl.LocalPlayer == Vulture.vulture || Helpers.shouldShowGhostInfo()))
                     roleName = roleName + Helpers.cs(Vulture.color, $" ({Vulture.vultureNumberToWin - Vulture.eatenBodies} left)");
                 if (Helpers.shouldShowGhostInfo()) {
                     if (Eraser.futureErased.Contains(p))
@@ -363,7 +360,7 @@ namespace TheOtherRoles
                     if (Arsonist.dousedPlayers.Contains(p))
                         roleName = Helpers.cs(Arsonist.color, "♨ ") + roleName;
                     if (p == Arsonist.arsonist)
-                        roleName = roleName + Helpers.cs(Arsonist.color, $" ({CachedPlayer.AllPlayers.Count(x => { return x.PlayerControl != Arsonist.arsonist && !x.Data.IsDead && !x.Data.Disconnected && !Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); })} left)");
+                        roleName = roleName + Helpers.cs(Arsonist.color, $" ({PlayerControl.AllPlayerControls.ToArray().Count(x => { return x != Arsonist.arsonist && !x.Data.IsDead && !x.Data.Disconnected && !Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); })} left)");
                     if (p == Jackal.fakeSidekick)
                         roleName = Helpers.cs(Sidekick.color, $" (fake SK) ") + roleName;
                         /*

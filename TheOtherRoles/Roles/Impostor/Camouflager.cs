@@ -1,5 +1,4 @@
-﻿using TheOtherRoles.Players;
-using TheOtherRoles.Roles.Neutral;
+﻿using TheOtherRoles.Roles.Neutral;
 using UnityEngine;
 
 namespace TheOtherRoles.Roles.Impostor
@@ -26,7 +25,7 @@ namespace TheOtherRoles.Roles.Impostor
 		{
 			if (Helpers.isCamoComms()) return;
 			camouflageTimer = 0f;
-			foreach (PlayerControl p in CachedPlayer.AllPlayers)
+			foreach (PlayerControl p in PlayerControl.AllPlayerControls.ToArray())
 			{
 				if (p == Ninja.ninja && Ninja.isInvisble || p == Jackal.jackal && Jackal.isInvisable)
 					continue;

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TheOtherRoles.Players;
 using UnityEngine;
 
 namespace TheOtherRoles.Roles.Neutral
@@ -36,7 +35,7 @@ namespace TheOtherRoles.Roles.Neutral
 
 		public static bool dousedEveryoneAlive()
 		{
-			return CachedPlayer.AllPlayers.All(x => { return x.PlayerControl == Arsonist.arsonist || x.Data.IsDead || x.Data.Disconnected || Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); });
+			return PlayerControl.AllPlayerControls.ToArray().All(x => { return x == Arsonist.arsonist || x.Data.IsDead || x.Data.Disconnected || Arsonist.dousedPlayers.Any(y => y.PlayerId == x.PlayerId); });
 		}
 
 		public static void clearAndReload()

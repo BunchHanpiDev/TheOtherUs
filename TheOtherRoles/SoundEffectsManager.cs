@@ -60,7 +60,7 @@ namespace TheOtherRoles
                         source.Stop();
                     }
                     float distance, volume;
-                    distance = Vector2.Distance(position, Players.CachedPlayer.LocalPlayer.PlayerControl.GetTruePosition());
+                    distance = Vector2.Distance(position, PlayerControl.LocalPlayer.GetTruePosition());
                     if (distance < range)
                         volume = (1f - distance / range);
                     else

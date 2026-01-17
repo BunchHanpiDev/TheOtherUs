@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Hazel;
-using TheOtherRoles.Players;
 using UnityEngine;
 
 namespace TheOtherRoles.Roles.Crewmate
@@ -42,12 +41,12 @@ namespace TheOtherRoles.Roles.Crewmate
 		public static void setHandcuffedKnows(bool active = true, byte playerId = Byte.MaxValue)
 		{
 			if (playerId == Byte.MaxValue)
-				playerId = CachedPlayer.LocalPlayer.PlayerId;
+				playerId = PlayerControl.LocalPlayer.PlayerId;
 
-			if (active && playerId == CachedPlayer.LocalPlayer.PlayerId)
+			if (active && playerId == PlayerControl.LocalPlayer.PlayerId)
 			{
-				MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShareGhostInfo, Hazel.SendOption.Reliable, -1);
-				writer.Write(CachedPlayer.LocalPlayer.PlayerId);
+				MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ShareGhostInfo, Hazel.SendOption.Reliable, -1);
+				writer.Write(PlayerControl.LocalPlayer.PlayerId);
 				writer.Write((byte)RPCProcedure.GhostInfoTypes.HandcuffNoticed);
 				AmongUsClient.Instance.FinishRpcImmediately(writer);
 			}
@@ -58,7 +57,7 @@ namespace TheOtherRoles.Roles.Crewmate
 				handcuffedPlayers.RemoveAll(x => x == playerId);
 			}
 
-			if (playerId == CachedPlayer.LocalPlayer.PlayerId)
+			if (playerId == PlayerControl.LocalPlayer.PlayerId)
 			{
 				HudManagerStartPatch.setAllButtonsHandcuffedStatus(active);
 				SoundEffectsManager.play("deputyHandcuff");

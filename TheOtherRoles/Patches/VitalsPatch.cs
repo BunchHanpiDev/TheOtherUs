@@ -1,14 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Hazel;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using UnityEngine;
-using static TheOtherRoles.TheOtherRoles;
-using static TheOtherRoles.GameHistory;
-using System.Reflection;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Crewmate;
+using UnityEngine;
+using static TheOtherRoles.GameHistory;
 
 namespace TheOtherRoles.Patches
 {
@@ -32,9 +29,9 @@ namespace TheOtherRoles.Patches
         static void UseVitalsTime()
         {
             // Don't waste network traffic if we're out of time.
-            if (TORMapOptions.restrictDevices > 0 && TORMapOptions.restrictVitalsTime > 0f && CachedPlayer.LocalPlayer.PlayerControl.isAlive() && CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker)
+            if (TORMapOptions.restrictDevices > 0 && TORMapOptions.restrictVitalsTime > 0f && PlayerControl.LocalPlayer.isAlive() && PlayerControl.LocalPlayer != Hacker.hacker)
             {
-                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.UseVitalsTime, Hazel.SendOption.Reliable, -1);
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UseVitalsTime, Hazel.SendOption.Reliable, -1);
                 writer.Write(vitalsTimer);
                 AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.useVitalsTime(vitalsTimer);
@@ -49,7 +46,7 @@ namespace TheOtherRoles.Patches
             {
                 vitalsTimer = 0f;
 
-                if (Hacker.hacker != null && CachedPlayer.LocalPlayer.PlayerControl == Hacker.hacker)
+                if (Hacker.hacker != null && PlayerControl.LocalPlayer == Hacker.hacker)
                 {
                     hackerTexts = new List<TMPro.TextMeshPro>();
                     foreach (VitalsPanel panel in __instance.vitals)
@@ -87,7 +84,7 @@ namespace TheOtherRoles.Patches
                         TimeRemaining.color = Palette.White;
                     }
 
-                    if (TORMapOptions.restrictVitalsTime <= 0f && CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker && !CachedPlayer.LocalPlayer.Data.IsDead)
+                    if (TORMapOptions.restrictVitalsTime <= 0f && PlayerControl.LocalPlayer != Hacker.hacker && !PlayerControl.LocalPlayer.Data.IsDead)
                     {
                         __instance.Close();
                         return false;
@@ -105,7 +102,7 @@ namespace TheOtherRoles.Patches
             {
 
                 // Hacker show time since death
-                if (Hacker.hacker != null && Hacker.hacker == CachedPlayer.LocalPlayer.PlayerControl && Hacker.hackerTimer > 0)
+                if (Hacker.hacker != null && Hacker.hacker == PlayerControl.LocalPlayer && Hacker.hackerTimer > 0)
                 {
                     for (int k = 0; k < __instance.vitals.Length; k++)
                     {

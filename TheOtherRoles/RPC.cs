@@ -10,7 +10,6 @@ using Reactor.Utilities.Extensions;
 using TheOtherRoles.CustomGameModes;
 using TheOtherRoles.Objects;
 using TheOtherRoles.Patches;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Roles.Modifier;
@@ -272,7 +271,7 @@ namespace TheOtherRoles
 
         public static void forceEnd() {
             if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
-            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray())
             {
                 if (!player.Data.Role.IsImpostor)
                 {
@@ -316,7 +315,7 @@ namespace TheOtherRoles
         }
 
         public static void setRole(byte roleId, byte playerId) {
-            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray()) {
                 if (player.PlayerId == playerId) {
                     switch((RoleId)roleId) {
                     case RoleId.Jester:
@@ -647,7 +646,7 @@ namespace TheOtherRoles
 
         public static void setCrewmate(PlayerControl player) {
             FastDestroyableSingleton<RoleManager>.Instance.SetRole(player, RoleTypes.Crewmate);
-            if (player.PlayerId == CachedPlayer.LocalPlayer.PlayerId) CachedPlayer.LocalPlayer.PlayerControl.moveable = true;
+            if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) PlayerControl.LocalPlayer.moveable = true;
 
         }
 
@@ -657,7 +656,7 @@ namespace TheOtherRoles
             player.Data.Role.TeamType = RoleTeamTypes.Crewmate;
             FastDestroyableSingleton<RoleManager>.Instance.SetRole(player, RoleTypes.Crewmate);
             erasePlayerRoles(player.PlayerId, true);
-            if (player.PlayerId == CachedPlayer.LocalPlayer.PlayerId) CachedPlayer.LocalPlayer.PlayerControl.moveable = true;   
+            if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) PlayerControl.LocalPlayer.moveable = true;   
             setRole((byte)RoleId.Crew,targetId);
          //   player.Data.Role.IsImpostor = false;
 	 }
@@ -686,7 +685,7 @@ namespace TheOtherRoles
         }
 
         public static void showIndomitableFlash() {
-            if (Indomitable.indomitable  == CachedPlayer.LocalPlayer.PlayerControl) {
+            if (Indomitable.indomitable  == PlayerControl.LocalPlayer) {
                 Helpers.showFlash(Indomitable.color);
             }
         }
@@ -732,7 +731,7 @@ namespace TheOtherRoles
         public static void timeMasterRewindTime() {
             TimeMaster.shieldActive = false; // Shield is no longer active when rewinding
             SoundEffectsManager.stop("timemasterShield");  // Shield sound stopped when rewinding
-            if(TimeMaster.timeMaster != null && TimeMaster.timeMaster == CachedPlayer.LocalPlayer.PlayerControl) {
+            if(TimeMaster.timeMaster != null && TimeMaster.timeMaster == PlayerControl.LocalPlayer) {
                 resetTimeMasterButton();
             }
             FastDestroyableSingleton<HudManager>.Instance.FullScreen.color = new Color(0f, 0.5f, 0.8f, 0.3f);
@@ -742,7 +741,7 @@ namespace TheOtherRoles
                 if (p == 1f) FastDestroyableSingleton<HudManager>.Instance.FullScreen.enabled = false;
             })));
 
-            if (TimeMaster.timeMaster == null || CachedPlayer.LocalPlayer.PlayerControl == TimeMaster.timeMaster) return; // Time Master himself does not rewind
+            if (TimeMaster.timeMaster == null || PlayerControl.LocalPlayer == TimeMaster.timeMaster) return; // Time Master himself does not rewind
 
             TimeMaster.isRewinding = true;
 
@@ -750,7 +749,7 @@ namespace TheOtherRoles
                 MapBehaviour.Instance.Close();
             if (Minigame.Instance)
                 Minigame.Instance.ForceClose();
-            CachedPlayer.LocalPlayer.PlayerControl.moveable = false;
+            PlayerControl.LocalPlayer.moveable = false;
         }
 
         public static void timeMasterShield() {
@@ -1042,11 +1041,11 @@ namespace TheOtherRoles
                     Amnisiac.clearAndReload();
                     Amnisiac.amnisiac = target;
 
-                    if (CachedPlayer.LocalPlayer.PlayerControl == Arsonist.arsonist)
+                    if (PlayerControl.LocalPlayer == Arsonist.arsonist)
                     {
                         int playerCounter = 0;
                         Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z);
-                        foreach (PlayerControl p in CachedPlayer.AllPlayers)
+                        foreach (PlayerControl p in PlayerControl.AllPlayerControls.ToArray())
                         {
                             if (TORMapOptions.playerIcons.ContainsKey(p.PlayerId) && p != Arsonist.arsonist)
                             {
@@ -1088,7 +1087,7 @@ namespace TheOtherRoles
                     Amnisiac.clearAndReload();
 
                     BountyHunter.bountyUpdateTimer = 0f;
-                    if (CachedPlayer.LocalPlayer.PlayerControl == BountyHunter.bountyHunter)
+                    if (PlayerControl.LocalPlayer == BountyHunter.bountyHunter)
                     {
                         Vector3 bottomLeft = new Vector3(-FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.x, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.y, FastDestroyableSingleton<HudManager>.Instance.UseButton.transform.localPosition.z) + new Vector3(-0.25f, 1f, 0);
                         BountyHunter.cooldownText = UnityEngine.Object.Instantiate<TMPro.TextMeshPro>(FastDestroyableSingleton<HudManager>.Instance.KillButton.cooldownTimerText, FastDestroyableSingleton<HudManager>.Instance.transform);
@@ -1096,7 +1095,7 @@ namespace TheOtherRoles
                         BountyHunter.cooldownText.transform.localPosition = bottomLeft + new Vector3(0f, -1f, -1f);
                         BountyHunter.cooldownText.gameObject.SetActive(true);
 
-                        foreach (PlayerControl p in CachedPlayer.AllPlayers)
+                        foreach (PlayerControl p in PlayerControl.AllPlayerControls.ToArray())
                         {
                             if (TORMapOptions.playerIcons.ContainsKey(p.PlayerId))
                             {
@@ -1365,7 +1364,7 @@ namespace TheOtherRoles
         }
 
         public static void veterenKill(byte targetId) {
-      if (CachedPlayer.LocalPlayer.PlayerControl == Veteren.veteren) {
+      if (PlayerControl.LocalPlayer == Veteren.veteren) {
             PlayerControl player = Helpers.playerById(targetId);
           Helpers.checkMuderAttemptAndKill(Veteren.veteren, player);
           }
@@ -1383,9 +1382,9 @@ namespace TheOtherRoles
                 return;}
             if (Medic.shielded == null || Medic.medic == null) return;
             
-            bool isShieldedAndShow = Medic.shielded == CachedPlayer.LocalPlayer.PlayerControl && Medic.showAttemptToShielded;
+            bool isShieldedAndShow = Medic.shielded == PlayerControl.LocalPlayer && Medic.showAttemptToShielded;
             isShieldedAndShow = isShieldedAndShow && (Medic.meetingAfterShielding || !Medic.showShieldAfterMeeting);  // Dont show attempt, if shield is not shown yet
-            bool isMedicAndShow = Medic.medic == CachedPlayer.LocalPlayer.PlayerControl && Medic.showAttemptToMedic;
+            bool isMedicAndShow = Medic.medic == PlayerControl.LocalPlayer && Medic.showAttemptToMedic;
 
             if (isShieldedAndShow || isMedicAndShow || Helpers.shouldShowGhostInfo()) Helpers.showFlash(Palette.ImpostorRed, duration: 0.5f, "Failed Murder Attempt on Shielded Player");
         }
@@ -1403,7 +1402,7 @@ namespace TheOtherRoles
                 oldShifter.Exiled();
                 GameHistory.overrideDeathReasonAndKiller(oldShifter, DeadPlayer.CustomDeathReason.Shift, player);
                 if (oldShifter == Lawyer.target && AmongUsClient.Instance.AmHost && Lawyer.lawyer != null) {
-                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.LawyerPromotesToPursuer, Hazel.SendOption.Reliable, -1);
+                    MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.LawyerPromotesToPursuer, Hazel.SendOption.Reliable, -1);
                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                     RPCProcedure.lawyerPromotesToPursuer();
                 }
@@ -1413,7 +1412,7 @@ namespace TheOtherRoles
             Shifter.shiftRole(oldShifter, player);
 
             // Set cooldowns to max for both players
-            if (CachedPlayer.LocalPlayer.PlayerControl == oldShifter || CachedPlayer.LocalPlayer.PlayerControl == player)
+            if (PlayerControl.LocalPlayer == oldShifter || PlayerControl.LocalPlayer == player)
                 CustomButton.ResetAllCooldowns();
         }
 
@@ -1440,7 +1439,7 @@ namespace TheOtherRoles
             if (Camouflager.camouflager == null && !Camouflager.camoComms) return;
             if (setTimer == 1) Camouflager.camouflageTimer = Camouflager.duration;
             if (Helpers.MushroomSabotageActive()) return; // Dont overwrite the fungle "camo"
-            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray())
                 player.setLook("", 6, "", "", "", "");
         }
 /*
@@ -1449,7 +1448,7 @@ namespace TheOtherRoles
 
             
             if (Helpers.MushroomSabotageActive()) return; // Dont overwrite the fungle "camo"
-            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray())
                 player.setLook("", 6, "", "", "", "");
 
         }
@@ -1462,7 +1461,7 @@ namespace TheOtherRoles
             }
 
             if (Vampire.vampire == null) return;
-            foreach (PlayerControl player in CachedPlayer.AllPlayers) {
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray()) {
                 if (player.PlayerId == targetId && !player.Data.IsDead) {
                         Vampire.bitten = player;
                 }
@@ -1478,7 +1477,7 @@ namespace TheOtherRoles
 
         public static void trackerUsedTracker(byte targetId) {
             Tracker.usedTracker = true;
-            foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray())
                 if (player.PlayerId == targetId)
                     Tracker.tracked = player;
         }
@@ -1521,11 +1520,11 @@ namespace TheOtherRoles
                 }
                 erasePlayerRoles(player.PlayerId, true);
                 Sidekick.sidekick = player;
-                if (player.PlayerId == CachedPlayer.LocalPlayer.PlayerId) CachedPlayer.LocalPlayer.PlayerControl.moveable = true;
+                if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) PlayerControl.LocalPlayer.moveable = true;
                 if (wasSpy || wasImpostor) Sidekick.wasTeamRed = true;
                 Sidekick.wasSpy = wasSpy;
                 Sidekick.wasImpostor = wasImpostor;
-                if (player == CachedPlayer.LocalPlayer.PlayerControl) SoundEffectsManager.play("jackalSidekick");
+                if (player == PlayerControl.LocalPlayer) SoundEffectsManager.play("jackalSidekick");
 				if (HandleGuesser.isGuesserGm && CustomOptionHolder.guesserGamemodeSidekickIsAlwaysGuesser.getBool() && !HandleGuesser.isGuesser(targetId))
 					setGuesserGm(targetId);
 			}
@@ -1819,8 +1818,8 @@ namespace TheOtherRoles
 
                 AntiTeleport.setPosition();
                 Helpers.showFlash(Cleaner.color, 1f);
-            if  (AntiTeleport.antiTeleport.FindAll(x => x.PlayerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId).Count == 0 && !CachedPlayer.LocalPlayer.Data.IsDead) {
-                foreach (PlayerControl player in CachedPlayer.AllPlayers){
+            if  (AntiTeleport.antiTeleport.FindAll(x => x.PlayerId == PlayerControl.LocalPlayer.PlayerId).Count == 0 && !PlayerControl.LocalPlayer.Data.IsDead) {
+                foreach (PlayerControl player in PlayerControl.AllPlayerControls.ToArray()){
                     if (MapBehaviour.Instance)
                 MapBehaviour.Instance.Close();
             if (Minigame.Instance)
@@ -1830,11 +1829,11 @@ namespace TheOtherRoles
                     PlayerControl.LocalPlayer.MyPhysics.RpcExitVent(Vent.currentVent.Id);
                     PlayerControl.LocalPlayer.MyPhysics.ExitAllVents();
                 }
-            if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 0) CachedPlayer.LocalPlayer.PlayerControl.transform.position = skeldSpawn[rnd.Next(skeldSpawn.Count)];
-                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 1) CachedPlayer.LocalPlayer.PlayerControl.transform.position = miraSpawn[rnd.Next(miraSpawn.Count)];
-                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 2) CachedPlayer.LocalPlayer.PlayerControl.transform.position = polusSpawn[rnd.Next(polusSpawn.Count)];
-                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 3) CachedPlayer.LocalPlayer.PlayerControl.transform.position = dleksSpawn[rnd.Next(dleksSpawn.Count)];
-                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 4) CachedPlayer.LocalPlayer.PlayerControl.transform.position = airshipSpawn[rnd.Next(airshipSpawn.Count)];}
+            if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 0) PlayerControl.LocalPlayer.transform.position = skeldSpawn[rnd.Next(skeldSpawn.Count)];
+                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 1) PlayerControl.LocalPlayer.transform.position = miraSpawn[rnd.Next(miraSpawn.Count)];
+                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 2) PlayerControl.LocalPlayer.transform.position = polusSpawn[rnd.Next(polusSpawn.Count)];
+                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 3) PlayerControl.LocalPlayer.transform.position = dleksSpawn[rnd.Next(dleksSpawn.Count)];
+                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 4) PlayerControl.LocalPlayer.transform.position = airshipSpawn[rnd.Next(airshipSpawn.Count)];}
                 Disperser.remainingDisperses--;
         }
         }
@@ -1867,7 +1866,7 @@ namespace TheOtherRoles
                     Bomber2.hasAlerted = false;
                     Bomber2.timeLeft = 0;
                 }
-                if (CachedPlayer.LocalPlayer.PlayerControl == Bomber2.hasBomb) {
+                if (PlayerControl.LocalPlayer == Bomber2.hasBomb) {
                     int totalTime = (int)(Bomber2.bombDelay + Bomber2.bombTimer);
                     int timeLeft = (int)(totalTime - (totalTime * p));
                     if (timeLeft <= Bomber2.bombTimer) {
@@ -1902,7 +1901,7 @@ namespace TheOtherRoles
             position.x = BitConverter.ToSingle(buff, 0 * sizeof(float));
             position.y = BitConverter.ToSingle(buff, 1 * sizeof(float));
             new NinjaTrace(position, Ninja.traceTime);
-            if (CachedPlayer.LocalPlayer.PlayerControl != Ninja.ninja)
+            if (PlayerControl.LocalPlayer != Ninja.ninja)
                 Ninja.ninjaMarked = null;
         }
 
@@ -1923,7 +1922,7 @@ namespace TheOtherRoles
 
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;
-            bool canSee = CachedPlayer.LocalPlayer.Data.Role.IsImpostor || CachedPlayer.LocalPlayer.Data.IsDead;
+            bool canSee = PlayerControl.LocalPlayer.Data.Role.IsImpostor || PlayerControl.LocalPlayer.Data.IsDead;
             if (canSee) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
@@ -1980,7 +1979,7 @@ namespace TheOtherRoles
             }
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;           
-            bool canSee = (Jackal.jackal == CachedPlayer.LocalPlayer.PlayerControl || CachedPlayer.LocalPlayer.Data.IsDead || (Sidekick.sidekick == CachedPlayer.LocalPlayer.PlayerControl));
+            bool canSee = (Jackal.jackal == PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.Data.IsDead || (Sidekick.sidekick == PlayerControl.LocalPlayer));
             if (canSee) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
@@ -2011,7 +2010,7 @@ namespace TheOtherRoles
 
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;           
-            if (CachedPlayer.LocalPlayer.Data.IsDead) color.a = 0.1f;
+            if (PlayerControl.LocalPlayer.Data.IsDead) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
             //target.cosmetics.colorBlindText.color = target.cosmetics.colorBlindText.color.SetAlpha(canSee ? 0.1f : 0f);
@@ -2038,7 +2037,7 @@ namespace TheOtherRoles
         public static void lightsOut() {
             Trickster.lightsOutTimer = Trickster.lightsOutDuration;
             // If the local player is impostor indicate lights out
-            if(Helpers.hasImpVision(GameData.Instance.GetPlayerById(CachedPlayer.LocalPlayer.PlayerId))) {
+            if(Helpers.hasImpVision(GameData.Instance.GetPlayerById(PlayerControl.LocalPlayer.PlayerId))) {
                 new CustomMessage("Lights are out", Trickster.lightsOutDuration);
             }
         }
@@ -2070,7 +2069,7 @@ namespace TheOtherRoles
             }
 
 
-            if (CachedPlayer.LocalPlayer.PlayerControl == SecurityGuard.securityGuard) {
+            if (PlayerControl.LocalPlayer == SecurityGuard.securityGuard) {
                 camera.gameObject.SetActive(true);
                 camera.gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
             } else {
@@ -2084,7 +2083,7 @@ namespace TheOtherRoles
             if (vent == null) return;
 
             SecurityGuard.remainingScrews -= SecurityGuard.ventPrice;
-            if (CachedPlayer.LocalPlayer.PlayerControl == SecurityGuard.securityGuard) {
+            if (PlayerControl.LocalPlayer == SecurityGuard.securityGuard) {
                 PowerTools.SpriteAnim animator = vent.GetComponent<PowerTools.SpriteAnim>(); 
                 
                 vent.EnterVentAnim = vent.ExitVentAnim = null;
@@ -2108,7 +2107,7 @@ namespace TheOtherRoles
 
         public static void arsonistWin() {
             Arsonist.triggerArsonistWin = true;
-            foreach (PlayerControl p in CachedPlayer.AllPlayers) {
+            foreach (PlayerControl p in PlayerControl.AllPlayerControls.ToArray()) {
                if (p != Arsonist.arsonist && !p.Data.IsDead) {
                     p.Exiled();
                     overrideDeathReasonAndKiller(p, DeadPlayer.CustomDeathReason.Arson, Arsonist.arsonist);
@@ -2127,7 +2126,7 @@ namespace TheOtherRoles
 
             Pursuer.pursuer = player;
 
-            if (player.PlayerId == CachedPlayer.LocalPlayer.PlayerId && client != null) {
+            if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId && client != null) {
                     Transform playerInfoTransform = client.cosmetics.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo != null) playerInfo.text = "";
@@ -2152,7 +2151,7 @@ namespace TheOtherRoles
 			bool lawyerDiedAdditionally = false;
 			if (Lawyer.lawyer != null && !Lawyer.isProsecutor && Lawyer.lawyer.PlayerId == killerId && Lawyer.target != null && Lawyer.target.PlayerId == dyingTargetId) {
                 // Lawyer guessed client.
-                if (CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer) {
+                if (PlayerControl.LocalPlayer == Lawyer.lawyer) {
                     FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(Lawyer.lawyer.Data, Lawyer.lawyer.Data);
                     if (MeetingHudPatch.guesserUI != null) MeetingHudPatch.guesserUIExitButton.OnClick.Invoke();
                 }
@@ -2188,10 +2187,10 @@ namespace TheOtherRoles
                     MeetingHud.Instance.CheckForEndVoting();
             }
             if (FastDestroyableSingleton<HudManager>.Instance != null && guesser != null)
-                if (CachedPlayer.LocalPlayer.PlayerControl == dyingTarget) {
+                if (PlayerControl.LocalPlayer == dyingTarget) {
                     FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(guesser.Data, dyingTarget.Data);
                     if (MeetingHudPatch.guesserUI != null) MeetingHudPatch.guesserUIExitButton.OnClick.Invoke();
-                } else if (dyingLoverPartner != null && CachedPlayer.LocalPlayer.PlayerControl == dyingLoverPartner) {
+                } else if (dyingLoverPartner != null && PlayerControl.LocalPlayer == dyingLoverPartner) {
                     FastDestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(dyingLoverPartner.Data, dyingLoverPartner.Data);
                     if (MeetingHudPatch.guesserUI != null) MeetingHudPatch.guesserUIExitButton.OnClick.Invoke();
                 }
@@ -2212,7 +2211,7 @@ namespace TheOtherRoles
 
 
             PlayerControl guessedTarget = Helpers.playerById(guessedTargetId);
-            if (CachedPlayer.LocalPlayer.Data.IsDead && guessedTarget != null && guesser != null) {
+            if (PlayerControl.LocalPlayer.Data.IsDead && guessedTarget != null && guesser != null) {
                 RoleInfo roleInfo = RoleInfo.allRoleInfos.FirstOrDefault(x => (byte)x.roleId == guessedRoleId);
                 string msg = $"{guesser.Data.PlayerName} guessed the role {roleInfo?.name ?? ""} for {guessedTarget.Data.PlayerName}!";
                 if (AmongUsClient.Instance.AmClient && FastDestroyableSingleton<HudManager>.Instance)
@@ -2249,12 +2248,12 @@ namespace TheOtherRoles
     }
 
     public static void showCultistFlash() {
-        if (Follower.follower  == CachedPlayer.LocalPlayer.PlayerControl) {
+        if (Follower.follower  == PlayerControl.LocalPlayer) {
             Helpers.showFlash(new Color(32f / 51f, 0.007843138f, 74f / 85f)); }
     }
 
     public static void showFollowerFlash() {
-        if (Cultist.cultist  == CachedPlayer.LocalPlayer.PlayerControl) {
+        if (Cultist.cultist  == PlayerControl.LocalPlayer) {
             Helpers.showFlash(new Color(32f / 51f, 0.007843138f, 74f / 85f)); }
     }
 
@@ -2272,7 +2271,7 @@ namespace TheOtherRoles
     public static void privateInvestigatorWatchFlash(byte targetId) {
         PlayerControl target = Helpers.playerById(targetId);
         // GetDefaultOutfit().ColorId
-		if (CachedPlayer.LocalPlayer.PlayerControl == PrivateInvestigator.privateInvestigator) {
+		if (PlayerControl.LocalPlayer == PrivateInvestigator.privateInvestigator) {
 			if (PrivateInvestigator.seeFlashColor) {
 				Helpers.showFlash(Palette.PlayerColors[target.Data.DefaultOutfit.ColorId]);
 			} else {
@@ -2323,7 +2322,7 @@ namespace TheOtherRoles
 	{
 		try
 		{
-			PlayerControl playerControl = CachedPlayer.LocalPlayer.PlayerControl;
+			PlayerControl playerControl = PlayerControl.LocalPlayer;
 			if (MeetingHud.Instance.playerStates == null)
 			{
 				return;
@@ -2464,7 +2463,7 @@ namespace TheOtherRoles
         public static void huntedRewindTime(byte playerId) {
             Hunted.timeshieldActive.Remove(playerId); // Shield is no longer active when rewinding
             SoundEffectsManager.stop("timemasterShield");  // Shield sound stopped when rewinding
-            if (playerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId) {
+            if (playerId == PlayerControl.LocalPlayer.PlayerId) {
                 resetHuntedRewindButton();
             }
             FastDestroyableSingleton<HudManager>.Instance.FullScreen.color = new Color(0f, 0.5f, 0.8f, 0.3f);
@@ -2474,7 +2473,7 @@ namespace TheOtherRoles
                 if (p == 1f) FastDestroyableSingleton<HudManager>.Instance.FullScreen.enabled = false;
             })));
 
-            if (!CachedPlayer.LocalPlayer.Data.Role.IsImpostor) return; // only rewind hunter
+            if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor) return; // only rewind hunter
 
             TimeMaster.isRewinding = true;
 
@@ -2482,7 +2481,7 @@ namespace TheOtherRoles
                 MapBehaviour.Instance.Close();
             if (Minigame.Instance)
                 Minigame.Instance.ForceClose();
-            CachedPlayer.LocalPlayer.PlayerControl.moveable = false;
+            PlayerControl.LocalPlayer.moveable = false;
         }
 
         public static void propHuntStartTimer(bool blackout = false) {

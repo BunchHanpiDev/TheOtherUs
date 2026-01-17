@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Linq;
 using System;
 using System.Text;
-using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
 using TheOtherRoles.Roles.Modifier;
@@ -81,7 +80,7 @@ namespace TheOtherRoles.Patches {
         public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)]ref EndGameResult endGameResult) {
             AdditionalTempData.clear();
 
-            foreach(var playerControl in CachedPlayer.AllPlayers) {
+            foreach(var playerControl in PlayerControl.AllPlayerControls.ToArray()) {
                 var roles = RoleInfo.getRoleInfoForPlayer(playerControl);
                 var (tasksCompleted, tasksTotal) = TasksHandler.taskInfo(playerControl.Data);
                 bool isGuesser = HandleGuesser.isGuesserGm && HandleGuesser.isGuesser(playerControl.PlayerId);
@@ -184,7 +183,7 @@ namespace TheOtherRoles.Patches {
                 if (!Lovers.existingWithKiller()) {
                     AdditionalTempData.winCondition = WinCondition.LoversTeamWin;
                     EndGameResult.CachedWinners = new Il2CppSystem.Collections.Generic.List<CachedPlayerData>();
-                    foreach (PlayerControl p in CachedPlayer.AllPlayers) {
+                    foreach (PlayerControl p in PlayerControl.AllPlayerControls.ToArray()) {
                         if (p == null) continue;
                         if (p == Lovers.lover1 || p == Lovers.lover2)
                             EndGameResult.CachedWinners.Add(new CachedPlayerData(p.Data));

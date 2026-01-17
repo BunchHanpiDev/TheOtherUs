@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TheOtherRoles.CustomGameModes;
-using TheOtherRoles.Players;
 using TheOtherRoles.Roles.Modifier;
 using TheOtherRoles.Utilities;
 using TMPro;
