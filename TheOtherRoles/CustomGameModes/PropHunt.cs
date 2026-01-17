@@ -1,17 +1,18 @@
-﻿using AmongUs.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AmongUs.Data;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TheOtherRoles.Patches;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace TheOtherRoles.CustomGameModes {
     [HarmonyPatch]
@@ -448,7 +449,7 @@ namespace TheOtherRoles.CustomGameModes {
         [HarmonyPostfix]
         public static void PlayerControlFixedUpdatePatch(PlayerControl __instance) {
             if (!PropHunt.isPropHuntGM) return;
-                if (__instance.Data.Role.IsImpostor) {
+			if (__instance.Data.Role.IsImpostor) {
                     __instance.GetComponent<CircleCollider2D>().radius = 0.2234f;
                     return;
                 }
@@ -544,8 +545,8 @@ namespace TheOtherRoles.CustomGameModes {
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
         [HarmonyPostfix]
         public static void MurderPlayerPostfix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target) {
-            if (!PropHunt.isPropHuntGM) return;
-            try {
+			if (!PropHunt.isPropHuntGM || target != CachedPlayer.LocalPlayer.PlayerControl) return;
+			try {
                 target.NetTransform.RpcSnapTo(__instance.transform.position);
             } catch { }
         }

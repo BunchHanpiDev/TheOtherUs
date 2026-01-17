@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Reactor.Utilities.Extensions;
 using TheOtherRoles.Objects;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace TheOtherRoles.Roles.Crewmate
 	{
 		public static PlayerControl tracker;
 		public static Color color = new Color32(100, 58, 220, byte.MaxValue);
-		public static List<Arrow> localArrows = new List<Arrow>();
+		public static List<Arrow> localArrows = new();
 
 		public static float updateIntervall = 5f;
 		public static bool resetTargetAfterMeeting = false;
@@ -16,13 +17,17 @@ namespace TheOtherRoles.Roles.Crewmate
 		public static float corpsesTrackingCooldown = 30f;
 		public static float corpsesTrackingDuration = 5f;
 		public static float corpsesTrackingTimer = 0f;
-		public static List<Vector3> deadBodyPositions = new List<Vector3>();
+		public static int trackingMode = 0;
+		public static List<Vector3> deadBodyPositions = new();
 
 		public static PlayerControl currentTarget;
 		public static PlayerControl tracked;
 		public static bool usedTracker = false;
 		public static float timeUntilUpdate = 0f;
-		public static Arrow arrow = new Arrow(Color.blue);
+		public static Arrow arrow = new(Color.blue);
+
+		public static GameObject DangerMeterParent;
+		public static DangerMeter Meter;
 
 		private static Sprite trackCorpsesButtonSprite;
 		public static Sprite getTrackCorpsesButtonSprite()
@@ -67,6 +72,12 @@ namespace TheOtherRoles.Roles.Crewmate
 			corpsesTrackingCooldown = CustomOptionHolder.trackerCorpsesTrackingCooldown.getFloat();
 			corpsesTrackingDuration = CustomOptionHolder.trackerCorpsesTrackingDuration.getFloat();
 			canTrackCorpses = CustomOptionHolder.trackerCanTrackCorpses.getBool();
+			trackingMode = CustomOptionHolder.trackerTrackingMethod.getSelection();
+			if (DangerMeterParent)
+			{
+				Meter.gameObject.Destroy();
+				DangerMeterParent.Destroy();
+			}
 		}
 	}
 }

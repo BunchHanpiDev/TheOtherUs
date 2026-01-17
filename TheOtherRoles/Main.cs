@@ -59,8 +59,6 @@ namespace TheOtherRoles
         public static ConfigEntry<ushort> Port { get; set; }
         public static ConfigEntry<string> ShowPopUpVersion { get; set; }
 
-        public static Sprite ModStamp;
-
         public static IRegionInfo[] defaultRegions;
 
 

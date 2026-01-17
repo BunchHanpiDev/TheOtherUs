@@ -85,7 +85,8 @@ namespace TheOtherRoles
         Thief,
         Poucher,
         Bomber,
-        Crewmate,
+		Yoyo,
+		Crewmate,
         Impostor,
         // Modifier ---
         Lover,
@@ -213,9 +214,11 @@ namespace TheOtherRoles
         PlaceBomb,
         DefuseBomb,
         ShareRoom,
+		YoyoMarkLocation,
+		YoyoBlink,
 
-        // Gamemode
-        SetGuesserGm,
+		// Gamemode
+		SetGuesserGm,
         HuntedShield,
         HuntedRewindTime,
         SetProp,
@@ -237,7 +240,8 @@ namespace TheOtherRoles
             Garlic.clearGarlics();
             JackInTheBox.clearJackInTheBoxes();
             NinjaTrace.clearTraces();
-            Portal.clearPortals();
+			Silhouette.clearSilhouettes();
+			Portal.clearPortals();
             Bloodytrail.resetSprites();
             Trap.clearTraps();
             clearAndReloadMapOptions();
@@ -498,7 +502,10 @@ namespace TheOtherRoles
                     case RoleId.Bomber:
                         Bomber.bomber = player;
                         break;
-                    }
+					case RoleId.Yoyo:
+						Yoyo.yoyo = player;
+						break;
+					}
 					if (AmongUsClient.Instance.AmHost && Helpers.roleCanUseVents(player) && !player.Data.Role.IsImpostor)
 					{
 						player.RpcSetRole(RoleTypes.Engineer);
@@ -1588,10 +1595,11 @@ namespace TheOtherRoles
             if (player == Blackmailer.blackmailer) Blackmailer.clearAndReload();
             if (player == Follower.follower) Follower.clearAndReload();
             if (player == Bomber.bomber) Bomber.clearAndReload();
-            
+			if (player == Yoyo.yoyo) Yoyo.clearAndReload();
 
-            // Other roles
-            if (player == Jester.jester) Jester.clearAndReload();
+
+			// Other roles
+			if (player == Jester.jester) Jester.clearAndReload();
             if (player == Werewolf.werewolf) Werewolf.clearAndReload();
             if (player == Miner.miner) Miner.clearAndReload();
             if (player == Arsonist.arsonist) Arsonist.clearAndReload();
@@ -2385,7 +2393,12 @@ namespace TheOtherRoles
             if (target == Ninja.ninja) Ninja.ninja = thief;
             if (target == Escapist.escapist) Escapist.escapist = thief;
             if (target == Bomber.bomber) Bomber.bomber = thief;
-            if (target == Bomber2.bomber2) Bomber2.bomber2 = thief;
+			if (target == Yoyo.yoyo)
+			{
+				Yoyo.yoyo = thief;
+				Yoyo.markedLocation = null;
+			}
+			if (target == Bomber2.bomber2) Bomber2.bomber2 = thief;
             if (target == Miner.miner) Miner.miner = thief;
             if (target == Undertaker.undertaker) Undertaker.undertaker = thief;
             if (target.Data.Role.IsImpostor) {
@@ -2585,7 +2598,46 @@ namespace TheOtherRoles
             if (Snitch.playerRoomMap.ContainsKey(playerId)) Snitch.playerRoomMap[playerId] = roomId;
             else Snitch.playerRoomMap.Add(playerId, roomId);
         }
-    }
+
+		public static void yoyoMarkLocation(byte[] buff)
+		{
+			if (Yoyo.yoyo == null) return;
+			Vector3 position = Vector3.zero;
+			position.x = BitConverter.ToSingle(buff, 0 * sizeof(float));
+			position.y = BitConverter.ToSingle(buff, 1 * sizeof(float));
+			Yoyo.markLocation(position);
+			new Silhouette(position, -1, false);
+		}
+
+		public static void yoyoBlink(bool isFirstJump, byte[] buff)
+		{
+			TheOtherRolesPlugin.Logger.LogMessage($"blink fistjumpo: {isFirstJump}");
+			if (Yoyo.yoyo == null || Yoyo.markedLocation == null) return;
+			var markedPos = (Vector3)Yoyo.markedLocation;
+			Yoyo.yoyo.NetTransform.SnapTo(markedPos);
+
+			var markedSilhouette = Silhouette.silhouettes.FirstOrDefault(s => s.gameObject.transform.position.x == markedPos.x && s.gameObject.transform.position.y == markedPos.y);
+			if (markedSilhouette != null)
+				markedSilhouette.permanent = false;
+
+			Vector3 position = Vector3.zero;
+			position.x = BitConverter.ToSingle(buff, 0 * sizeof(float));
+			position.y = BitConverter.ToSingle(buff, 1 * sizeof(float));
+			// Create Silhoutte At Start Position:
+			if (isFirstJump)
+			{
+				Yoyo.markLocation(position);
+				new Silhouette(position, Yoyo.blinkDuration, true);
+			}
+			else
+			{
+				new Silhouette(position, 5, true);
+				Yoyo.markedLocation = null;
+			}
+			if (Chameleon.chameleon.Any(x => x.PlayerId == Yoyo.yoyo.PlayerId)) // Make the Yoyo visible if chameleon!
+				Chameleon.lastMoved[Yoyo.yoyo.PlayerId] = Time.time;
+		}
+	}
 
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
     class RPCHandlerPatch
@@ -2934,6 +2986,12 @@ namespace TheOtherRoles
                     break;
 				case (byte)CustomRPC.StopStart:
 					RPCProcedure.stopStart(reader.ReadByte());
+					break;
+				case (byte)CustomRPC.YoyoMarkLocation:
+					RPCProcedure.yoyoMarkLocation(reader.ReadBytesAndSize());
+					break;
+				case (byte)CustomRPC.YoyoBlink:
+					RPCProcedure.yoyoBlink(reader.ReadByte() == byte.MaxValue, reader.ReadBytesAndSize());
 					break;
 
 				// Game mode

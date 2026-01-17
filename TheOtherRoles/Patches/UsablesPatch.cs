@@ -862,7 +862,12 @@ namespace TheOtherRoles.Patches {
             if (HideNSeek.isHideNSeekGM)
                 return HideNSeek.canSabotage;
             if (PropHunt.isPropHuntGM) return false;
-            return true;
+			if (PlayerControl.LocalPlayer.Data.IsDead && CustomOptionHolder.deadImpsBlockSabotage.getBool())
+			{
+				__instance.ShowNormalMap();
+				return false;
+			}
+			return true;
         }
     }
 

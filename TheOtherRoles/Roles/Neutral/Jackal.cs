@@ -33,6 +33,7 @@ namespace TheOtherRoles.Roles.Neutral
 		public static bool canSabotage = false;
 		public static bool wasImpostor;
 		public static bool wasSpy;
+		public static bool canSabotageLights;
 		public static float chanceSwoop = 0f;
 		public static bool canSwoop = false;
 		public static bool canSwoop2 = false;
@@ -84,6 +85,7 @@ namespace TheOtherRoles.Roles.Neutral
 			formerJackals.Clear();
 			hasImpostorVision = CustomOptionHolder.jackalAndSidekickHaveImpostorVision.getBool();
 			wasTeamRed = wasImpostor = wasSpy = false;
+			canSabotageLights = CustomOptionHolder.jackalCanSabotageLights.getBool();
 			chanceSwoop = CustomOptionHolder.jackalChanceSwoop.getSelection() / 10f;
 			if (rnd.NextDouble() < chanceSwoop)
 			{

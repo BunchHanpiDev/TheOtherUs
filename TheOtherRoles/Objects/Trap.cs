@@ -40,14 +40,16 @@ namespace TheOtherRoles.Objects {
             trapRenderer.sprite = getTrapSprite();
             trap.SetActive(false);
             if (CachedPlayer.LocalPlayer.PlayerId == Trapper.trapper.PlayerId) trap.SetActive(true);
-            this.instanceId = ++instanceCounter;
+			trapRenderer.color = Color.white * new Vector4(1, 1, 1, 0.5f);
+			this.instanceId = ++instanceCounter;
             traps.Add(this);
             arrow.Update(position);
             arrow.arrow.SetActive(false);
             FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(5, new Action<float>((x) => {
                 if (x == 1f) {
                     this.triggerable = true;
-                }
+					trapRenderer.color = Color.white;
+				}
             })));
         }
 

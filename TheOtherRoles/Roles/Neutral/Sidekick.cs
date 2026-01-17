@@ -18,6 +18,7 @@ namespace TheOtherRoles.Roles.Neutral
 		public static bool canKill = true;
 		public static bool promotesToJackal = true;
 		public static bool hasImpostorVision = false;
+		public static bool canSabotageLights;
 
 		public static void clearAndReload()
 		{
@@ -29,6 +30,7 @@ namespace TheOtherRoles.Roles.Neutral
 			promotesToJackal = CustomOptionHolder.sidekickPromotesToJackal.getBool();
 			hasImpostorVision = CustomOptionHolder.jackalAndSidekickHaveImpostorVision.getBool();
 			wasTeamRed = wasImpostor = wasSpy = false;
+			canSabotageLights = CustomOptionHolder.sidekickCanSabotageLights.getBool();
 		}
 	}
 }

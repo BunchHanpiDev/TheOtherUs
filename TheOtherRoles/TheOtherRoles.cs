@@ -74,11 +74,12 @@ namespace TheOtherRoles
             Miner.clearAndReload();
             Trapper.clearAndReload();
             Bomber.clearAndReload();
-            //Guesser.clearAndReload();
-            //Swooper.clearAndReload();
+			Yoyo.clearAndReload();
+			//Guesser.clearAndReload();
+			//Swooper.clearAndReload();
 
-            // Modifier
-            Bait.clearAndReload();
+			// Modifier
+			Bait.clearAndReload();
             Bloody.clearAndReload();
             AntiTeleport.clearAndReload();
             Tiebreaker.clearAndReload();
