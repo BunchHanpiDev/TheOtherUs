@@ -1,16 +1,17 @@
-using HarmonyLib;
 using System;
-using static TheOtherRoles.TheOtherRoles;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using Hazel;
-using TheOtherRoles.Utilities;
 using TheOtherRoles.CustomGameModes;
+using TheOtherRoles.Modules;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Roles.Modifier;
 using TheOtherRoles.Roles.Neutral;
+using TheOtherRoles.Utilities;
+using UnityEngine;
+using static TheOtherRoles.TheOtherRoles;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
@@ -86,9 +87,6 @@ namespace TheOtherRoles.Patches {
                     BountyHunter.cooldownText.gameObject.SetActive(true);
                 }
             }
-
-            // Force Reload of SoundEffectHolder
-            SoundEffectsManager.Load();
 
             if (CustomOptionHolder.randomGameStartPosition.getBool()) { //Random spawn on game start
 
@@ -337,15 +335,31 @@ namespace TheOtherRoles.Patches {
                 }
                 yourTeam = fakeImpostorTeam;
             }
-        }
+
+			// Role draft: If spy is enabled, don't show the team
+			if (CustomOptionHolder.spySpawnRate.getSelection() > 0 && PlayerControl.AllPlayerControls.ToArray().ToList().Where(x => x.Data.Role.IsImpostor).Count() > 1)
+			{
+				var fakeImpostorTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>(); // The local player always has to be the first one in the list (to be displayed in the center)
+				fakeImpostorTeam.Add(PlayerControl.LocalPlayer);
+				yourTeam = fakeImpostorTeam;
+			}
+		}
 
         public static void setupIntroTeam(IntroCutscene __instance, ref  Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam) {
             List<RoleInfo> infos = RoleInfo.getRoleInfoForPlayer(PlayerControl.LocalPlayer);
             RoleInfo roleInfo = infos.Where(info => !info.isModifier).FirstOrDefault();
-            if (roleInfo == null) return;
-            if (roleInfo.isNeutral) {
-                var neutralColor = new Color32(76, 84, 78, 255);
-               __instance.BackgroundBar.material.color = roleInfo.color;
+			var neutralColor = new Color32(76, 84, 78, 255);
+			if (roleInfo == null || roleInfo == RoleInfo.crewmate)
+			{
+				if (RoleDraft.isEnabled && CustomOptionHolder.neutralRolesCountMax.getSelection() > 0)
+				{
+					__instance.TeamTitle.text = "<size=60%>Crewmate" + Helpers.cs(Color.white, " / ") + Helpers.cs(neutralColor, "Neutral") + "</size>";
+				}
+				return;
+			}
+			if (roleInfo.isNeutral)
+			{
+				__instance.BackgroundBar.material.color = roleInfo.color;
                 __instance.TeamTitle.text = "Neutral";
                 __instance.TeamTitle.color = neutralColor;
 

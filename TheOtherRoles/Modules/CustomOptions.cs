@@ -254,48 +254,61 @@ namespace TheOtherRoles {
             }
         }
 
-        public static int deserializeOptions(byte[] inputValues) {
-            BinaryReader reader = new BinaryReader(new MemoryStream(inputValues));
-            int lastId = -1;
-            bool somethingApplied = false;
-            int errors = 0;
-            while (reader.BaseStream.Position < inputValues.Length) {
-                try {
-                    int selection = reader.ReadByte();
-                    int id = -1;
-                    bool consecutive = selection >= 128;
-                    if (consecutive) {
-                        selection -= 128;
-                        id = lastId + 1;
-                    } else {
-                        id = reader.ReadUInt16();
-                    }
-                    if (id == 0) continue;
-                    lastId = id;
-                    CustomOption option = options.First(option => option.id == id);
-                    option.entry = TheOtherRolesPlugin.Instance.Config.Bind($"Preset{preset}", option.id.ToString(), option.defaultSelection);
-                    option.selection = selection;
+		public static int deserializeOptions(byte[] inputValues)
+		{
+			BinaryReader reader = new BinaryReader(new MemoryStream(inputValues));
+			int lastId = -1;
+			bool somethingApplied = false;
+			int errors = 0;
+			while (reader.BaseStream.Position < inputValues.Length)
+			{
+				try
+				{
+					int selection = reader.ReadByte();
+					int id = -1;
+					bool consecutive = selection >= 128;
+					if (consecutive)
+					{
+						selection -= 128;
+						id = lastId + 1;
+					}
+					else
+					{
+						id = reader.ReadUInt16();
+					}
+					if (id == 0) continue;
+					lastId = id;
+					CustomOption option = options.FirstOrDefault(option => option.id == id);
+					if (option == null) continue;
+
+					option.selection = selection;
+					option.entry = TheOtherRolesPlugin.Instance.Config.Bind($"Preset{preset}", option.id.ToString(), option.defaultSelection);
 					option.entry.Value = selection;
+
 					try
 					{
 						if (option.onChange != null) option.onChange();
 					}
 					catch { }
-					if (option.optionBehaviour != null && option.optionBehaviour is StringOption stringOption) {
-                        stringOption.oldValue = stringOption.Value = option.selection;
-                        stringOption.ValueText.text = option.selections[option.selection].ToString();
-                    }
-                    somethingApplied = true;
-                } catch (Exception e) {
-                    TheOtherRolesPlugin.Logger.LogWarning($"id:{lastId}:{e}: while deserializing - tried to paste invalid settings!");
-                    errors++;
-                }
-            }
-            return Convert.ToInt32(somethingApplied) + (errors > 0 ? 0 : 1);
-        }
 
-        // Copy to or paste from clipboard (as string)
-        public static void copyToClipboard() {
+					if (option.optionBehaviour != null && option.optionBehaviour is StringOption stringOption)
+					{
+						stringOption.oldValue = stringOption.Value = option.selection;
+						stringOption.ValueText.text = option.selections[option.selection].ToString();
+					}
+					somethingApplied = true;
+				}
+				catch (Exception e)
+				{
+					TheOtherRolesPlugin.Logger.LogWarning($"id:{lastId}:{e}: while deserializing - tried to paste invalid settings!");
+					errors++;
+				}
+			}
+			return Convert.ToInt32(somethingApplied) + (errors > 0 ? 0 : 1);
+		}
+
+		// Copy to or paste from clipboard (as string)
+		public static void copyToClipboard() {
             GUIUtility.systemCopyBuffer = $"{TheOtherRolesPlugin.VersionString}!{Convert.ToBase64String(serializeOptions())}!{vanillaSettings.Value}";
         }
 
@@ -523,8 +536,6 @@ namespace TheOtherRoles {
                     if ((int)optionType == 99)
                         categoryHeaderMasked.Title.text = new Dictionary<CustomOptionType, string>() { { CustomOptionType.Impostor, "Impostor Roles" }, { CustomOptionType.Neutral, "Neutral Roles" },
                             { CustomOptionType.Crewmate, "Crewmate Roles" }, { CustomOptionType.Modifier, "Modifiers" } }[curType];
-                    categoryHeaderMasked.Title.outlineColor = Color.white;
-                    categoryHeaderMasked.Title.outlineWidth = 0.2f;
                     categoryHeaderMasked.transform.SetParent(__instance.settingsContainer);
                     categoryHeaderMasked.transform.localScale = Vector3.one;
                     categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, num, -2f);
@@ -557,10 +568,8 @@ namespace TheOtherRoles {
                     viewSettingsInfoPanel.titleText.text = "Spawn Chance";
                 }
                 if ((int)optionType == 99) {
-                    viewSettingsInfoPanel.titleText.outlineColor = Color.white;
-                    viewSettingsInfoPanel.titleText.outlineWidth = 0.2f;
                     if (option.type == CustomOptionType.Modifier)
-                        viewSettingsInfoPanel.settingText.text = viewSettingsInfoPanel.settingText.text + GameOptionsDataPatch.buildModifierExtras(option);
+                        viewSettingsInfoPanel.settingText.text = viewSettingsInfoPanel.settingText.text + LegacyGameOptionsPatch.buildModifierExtras(option);
                 }
                 __instance.settingsInfo.Add(viewSettingsInfoPanel.gameObject);
 
@@ -748,8 +757,6 @@ namespace TheOtherRoles {
                     CategoryHeaderMasked categoryHeaderMasked = UnityEngine.Object.Instantiate<CategoryHeaderMasked>(menu.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, menu.settingsContainer);
                     categoryHeaderMasked.SetHeader(StringNames.ImpostorsCategory, 20);
                     categoryHeaderMasked.Title.text = option.heading != "" ? option.heading : option.name;
-                    categoryHeaderMasked.Title.outlineColor = Color.white;
-                    categoryHeaderMasked.Title.outlineWidth = 0.2f;
                     categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
                     categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
                     num -= 0.63f;
@@ -971,24 +978,13 @@ namespace TheOtherRoles {
     {
         public static void Postfix()
         {
-            //CustomOption.ShareOptionSelections();
             CustomOption.saveVanillaOptions();
-        }
-    }
+			CustomOption.ShareOptionSelections();
+		}
+	}
 
-    [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoSpawnPlayer))]
-    public class AmongUsClientOnPlayerJoinedPatch {
-        public static void Postfix() {
-            if (PlayerControl.LocalPlayer != null && AmongUsClient.Instance.AmHost) {
-                GameManager.Instance.LogicOptions.SyncOptions();
-                CustomOption.ShareOptionSelections();
-            }
-        }
-    }
-
-
-    [HarmonyPatch] 
-    class GameOptionsDataPatch
+	[HarmonyPatch] 
+    class LegacyGameOptionsPatch
     {
         private static string buildRoleOptions() {
             var impRoles = buildOptionsOfType(CustomOption.CustomOptionType.Impostor, true) + "\n";
@@ -1172,15 +1168,15 @@ namespace TheOtherRoles {
     [HarmonyPatch]
     public class AddToKillDistanceSetting
     {
-        [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.AreInvalid))]
+        [HarmonyPatch(typeof(LegacyGameOptions), nameof(LegacyGameOptions.AreInvalid))]
         [HarmonyPrefix]
         
-        public static bool Prefix(GameOptionsData __instance, ref int maxExpectedPlayers)
+        public static bool Prefix(LegacyGameOptions __instance, ref int maxExpectedPlayers)
         {
             //making the killdistances bound check higher since extra short is added
             return __instance.MaxPlayers > maxExpectedPlayers || __instance.NumImpostors < 1
                     || __instance.NumImpostors > 3 || __instance.KillDistance < 0
-                    || __instance.KillDistance >= GameOptionsData.KillDistances.Count
+                    || __instance.KillDistance >= LegacyGameOptions.KillDistances.Count
                     || __instance.PlayerSpeedMod <= 0f || __instance.PlayerSpeedMod > 3f;
         }
 
@@ -1191,7 +1187,7 @@ namespace TheOtherRoles {
         {
             return __instance.MaxPlayers > maxExpectedPlayers || __instance.NumImpostors < 1
                     || __instance.NumImpostors > 3 || __instance.KillDistance < 0
-                    || __instance.KillDistance >= GameOptionsData.KillDistances.Count
+                    || __instance.KillDistance >= LegacyGameOptions.KillDistances.Count
                     || __instance.PlayerSpeedMod <= 0f || __instance.PlayerSpeedMod > 3f;
         }
 
@@ -1234,7 +1230,7 @@ namespace TheOtherRoles {
                 else {
                     index = GameOptionsManager.Instance.currentHideNSeekGameOptions.KillDistance;
                 }
-                value = GameOptionsData.KillDistanceStrings[index];
+                value = LegacyGameOptions.KillDistanceStrings[index];
             }
         }
 
@@ -1253,15 +1249,15 @@ namespace TheOtherRoles {
 
         public static void addKillDistance()
         {
-            GameOptionsData.KillDistances = new(new float[] { 0.5f, 1f, 1.8f, 2.5f });
-            GameOptionsData.KillDistanceStrings = new(new string[] { "Very Short", "Short", "Medium", "Long" });
+            LegacyGameOptions.KillDistances = new(new float[] { 0.5f, 1f, 1.8f, 2.5f });
+            LegacyGameOptions.KillDistanceStrings = new(new string[] { "Very Short", "Short", "Medium", "Long" });
         }
 
         [HarmonyPatch(typeof(StringGameSetting), nameof(StringGameSetting.GetValueString))]
         [HarmonyPrefix]
         public static bool AjdustStringForViewPanel(StringGameSetting __instance, float value, ref string __result) {
             if (__instance.OptionName != Int32OptionNames.KillDistance) return true;
-            __result = GameOptionsData.KillDistanceStrings[(int)value];
+            __result = LegacyGameOptions.KillDistanceStrings[(int)value];
             return false;
         }
     }
@@ -1300,7 +1296,7 @@ namespace TheOtherRoles {
                 HudManagerUpdate.ToggleSettings(HudManager.Instance);
             if (Input.GetKeyDown(KeyCode.F2) && LobbyBehaviour.Instance)
                 HudManagerUpdate.ToggleSummary(HudManager.Instance);
-            if (TheOtherRolesPlugin.optionsPage >= GameOptionsDataPatch.maxPage) TheOtherRolesPlugin.optionsPage = 0;
+            if (TheOtherRolesPlugin.optionsPage >= LegacyGameOptionsPatch.maxPage) TheOtherRolesPlugin.optionsPage = 0;
         }
     }
 
@@ -1312,7 +1308,7 @@ namespace TheOtherRoles {
         public static void Prefix2(HudManager __instance) {
             if (!settingsTMPs[0]) return;
             foreach (var tmp in settingsTMPs) tmp.text = "";
-            var settingsString = GameOptionsDataPatch.buildAllOptions(hideExtras: true);
+            var settingsString = LegacyGameOptionsPatch.buildAllOptions(hideExtras: true);
             var blocks = settingsString.Split("\n\n", StringSplitOptions.RemoveEmptyEntries); ;
             string curString = "";
             string curBlock;

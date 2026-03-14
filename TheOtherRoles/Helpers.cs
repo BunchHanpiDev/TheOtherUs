@@ -1,26 +1,27 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using UnityEngine;
 using System.Linq;
-using static TheOtherRoles.TheOtherRoles;
-using TheOtherRoles.Modules;
+using System.Reflection;
+using System.Threading.Tasks;
+using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
-using TheOtherRoles.Utilities;
-using System.Threading.Tasks;
-using TheOtherRoles.CustomGameModes;
 using Reactor.Utilities.Extensions;
-using AmongUs.GameOptions;
-using TheOtherRoles.Patches;
+using TheOtherRoles.CustomGameModes;
+using TheOtherRoles.Modules;
 using TheOtherRoles.Objects;
-using System.Collections;
+using TheOtherRoles.Patches;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Impostor;
 using TheOtherRoles.Roles.Modifier;
 using TheOtherRoles.Roles.Neutral;
+using TheOtherRoles.Utilities;
+using UnityEngine;
+using UnityEngine.Networking;
+using static TheOtherRoles.TheOtherRoles;
 
 namespace TheOtherRoles {
 
@@ -60,8 +61,8 @@ namespace TheOtherRoles {
     }
     public static class Helpers
     {
-
-        public static Dictionary<string, Sprite> CachedSprites = new();
+		public static string previousEndGameSummary = "";
+		public static Dictionary<string, Sprite> CachedSprites = new();
         public static Sprite teamCultistChat = null;
         public static Sprite teamLoverChat = null;
 
@@ -295,7 +296,7 @@ namespace TheOtherRoles {
             RoleManager.Instance.SetRole(player, AmongUs.GameOptions.RoleTypes.Impostor);
             player.SetKillTimer(GameOptionsManager.Instance.currentNormalGameOptions.KillCooldown);
 
-            System.Console.WriteLine("PROOF I AM IMP VANILLA ROLE: "+player.Data.Role.IsImpostor);
+            System.Console.WriteLine("PROOF I AM IMP VANILLA ROLE: "+ player.Data.Role.IsImpostor);
 
             foreach (var player2 in PlayerControl.AllPlayerControls) {
                 if (player2.Data.Role.IsImpostor && PlayerControl.LocalPlayer.Data.Role.IsImpostor) {
@@ -326,8 +327,6 @@ namespace TheOtherRoles {
                 showTargetNameOnButtonExplicit(null, button, text);
             }
         }
-        
-
 
         public static void showTargetNameOnButtonExplicit(PlayerControl target, CustomButton button, string defaultText) {
             var text = defaultText;
@@ -337,19 +336,19 @@ namespace TheOtherRoles {
             button.showButtonText = true;
         }
 
-        public static bool isInvisible(PlayerControl player)
-	{
-		if (Jackal.jackal != null && Jackal.jackal == player && Jackal.isInvisable)
+		public static bool isInvisible(PlayerControl player)
 		{
-			return true;
+			if (Jackal.jackal != null && Jackal.jackal == player && Jackal.isInvisable)
+			{
+				return true;
+			}
+			return false;
 		}
-		return false;
-	}
 
-        public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit, bool cache=true) {
+		public static Sprite loadSpriteFromResources(string path, float pixelsPerUnit, bool cache = true) {
             try
             {
-                if (cache && CachedSprites.TryGetValue(path + pixelsPerUnit, out var sprite)) return sprite;
+				if (cache && CachedSprites.TryGetValue(path + pixelsPerUnit, out var sprite)) return sprite;
                 Texture2D texture = loadTextureFromResources(path);
                 sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
                 if (cache) sprite.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontSaveInEditor;
@@ -361,19 +360,16 @@ namespace TheOtherRoles {
             return null;
         }
 
-        public static unsafe Texture2D loadTextureFromResources(string path) {
+        public static Texture2D loadTextureFromResources(string path) {
             try {
-                Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, true);
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                Stream stream = assembly.GetManifestResourceStream(path);
-                var length = stream.Length;
-                var byteTexture = new Il2CppStructArray<byte>(length);
-                stream.Read(new Span<byte>(IntPtr.Add(byteTexture.Pointer, IntPtr.Size * 4).ToPointer(), (int) length));
-                if (path.Contains("HorseHats")) {
-                    byteTexture = new Il2CppStructArray<byte>(byteTexture.Reverse().ToArray());
-                }
-                ImageConversion.LoadImage(texture, byteTexture, false);
-                return texture;
+				var texture = new Texture2D(0, 0, TextureFormat.RGBA32, false)
+				{
+					wrapMode = TextureWrapMode.Clamp
+				};
+				var myStream = Assembly.GetCallingAssembly().GetManifestResourceStream(path);
+				var data = myStream.ReadFully();
+				texture.LoadImage(data, false);
+				return texture;
             } catch {
                 System.Console.WriteLine("Error loading texture from resources: " + path);
             }
@@ -1318,5 +1314,12 @@ public static bool isTeamCultist(PlayerControl player)
             throw new NotImplementedException();
         }
 
-    }
+		public static byte[] GetUnstrippedData(this DownloadHandler dh)
+		{
+			var nativeData = dh.GetNativeData();
+			if (nativeData.IsCreated)
+				return nativeData.ToArray();
+			return null;
+		}
+	}
 }

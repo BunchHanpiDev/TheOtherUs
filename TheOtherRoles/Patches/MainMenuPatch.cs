@@ -21,7 +21,10 @@ namespace TheOtherRoles.Modules {
         private static AnnouncementPopUp popUp;
 
         private static void Prefix(MainMenuManager __instance) {
-            var template = GameObject.Find("ExitGameButton");
+			// Force Reload of SoundEffectHolder
+			SoundEffectsManager.Load();
+
+			var template = GameObject.Find("ExitGameButton");
             var template2 = GameObject.Find("CreditsButton");
             if (template == null || template2 == null) return;
             template.transform.localScale = new Vector3(0.42f, 0.84f, 0.84f);
@@ -118,9 +121,13 @@ TownOfUs - Idea for the Swapper, Shifter, Arsonist and a similar Mayor role came
 Ottomated - Idea for the Morphling, Snitch and Camouflager role came from Ottomated
 Crowded-Mod - Our implementation for 10+ player lobbies was inspired by the one from the Crowded Mod Team
 Goose-Goose-Duck - Idea for the Vulture role came from Slushiegoose
-TheEpicRoles - Idea for the first kill shield (partly) and the tabbed option menu (fully + some code), by LaicosVK DasMonschta Nova
-ugackMiner53 - Idea and core code for the Prop Hunt game mode</size>";
-                creditsString += "</align>";
+TheEpicRoles - Idea for the first kill shield (partly) and the (old) tabbed option menu (fully + some code), by LaicosVK DasMonschta Nova
+ugackMiner53 - Idea and core code for the Prop Hunt game mode
+Role Draft Music: [https://www.youtube.com/watch?v=9STiQ8cCIo0]Unreal Superhero 3 by Kenët & Rez[]
+
+License: TheOtherRoles is licensed under the [https://github.com/TheOtherRolesAU/TheOtherRoles?tab=GPL-3.0-1-ov-file#readme]GPLv3[]
+</size>";
+				creditsString += "</align>";
 
                 Assets.InnerNet.Announcement creditsAnnouncement = new() {
                     Id = "torCredits",

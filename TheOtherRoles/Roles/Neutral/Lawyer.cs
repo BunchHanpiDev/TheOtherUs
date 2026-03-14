@@ -39,7 +39,7 @@ namespace TheOtherRoles.Roles.Neutral
 			targetKnows = CustomOptionHolder.lawyerTargetKnows.getBool();
 			lawyerKnowsRole = CustomOptionHolder.lawyerKnowsRole.getBool();
 			targetCanBeJester = CustomOptionHolder.lawyerTargetCanBeJester.getBool();
-			canCallEmergency = CustomOptionHolder.jesterCanCallEmergency.getBool();
+			canCallEmergency = CustomOptionHolder.lawyerCanCallEmergency.getBool();
 		}
 	}
 }

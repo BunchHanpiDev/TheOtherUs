@@ -109,8 +109,8 @@ namespace TheOtherRoles.Objects {
             else if (secondPortal == null) {
                 secondPortal = this;
             }
-            var lastRoom = FastDestroyableSingleton<HudManager>.Instance?.roomTracker.LastRoom.RoomId;
-            this.room = lastRoom != null ? DestroyableSingleton<TranslationController>.Instance.GetString((SystemTypes)lastRoom) : "Open Field";
+			var lastRoom = FastDestroyableSingleton<HudManager>.Instance?.roomTracker?.LastRoom?.RoomId;
+			this.room = lastRoom != null ? DestroyableSingleton<TranslationController>.Instance.GetString((SystemTypes)lastRoom) : "Open Field";
         }
 
         public static bool locationNearEntry(Vector2 p) {

@@ -11,6 +11,8 @@ namespace TheOtherRoles.Roles.Modifier
 		public static PlayerControl futureShift;
 		public static PlayerControl currentTarget;
 
+		public static bool shiftsMedicShield = false;
+
 		private static Sprite buttonSprite;
 		public static Sprite getButtonSprite()
 		{
@@ -66,6 +68,8 @@ namespace TheOtherRoles.Roles.Modifier
 			{
 				if (repeat) shiftRole(player2, player1, false);
 				Medic.medic = player1;
+				if (Medic.shielded != null && Medic.shielded == player1 && shiftsMedicShield)
+					Medic.shielded = player2;
 			}
 			else if (Swapper.swapper != null && Swapper.swapper == player2)
 			{
@@ -129,6 +133,7 @@ namespace TheOtherRoles.Roles.Modifier
 			shifter = null;
 			currentTarget = null;
 			futureShift = null;
+			shiftsMedicShield = CustomOptionHolder.modifierShifterShiftsMedicShield.getBool();
 		}
 	}
 }

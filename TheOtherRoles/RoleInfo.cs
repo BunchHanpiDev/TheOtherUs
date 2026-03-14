@@ -21,8 +21,10 @@ namespace TheOtherRoles
         public bool isNeutral;
         public bool isGuessable;
         public bool isModifier;
+		public bool isImpostor => color == Palette.ImpostorRed && !(roleId == RoleId.Spy);
+		public static Dictionary<RoleId, RoleInfo> roleInfoById = new();
 
-        public RoleInfo(string name, Color color, string introDescription, string shortDescription, RoleId roleId, bool isNeutral = false, bool isModifier = false, bool isGuessable = false) {
+		public RoleInfo(string name, Color color, string introDescription, string shortDescription, RoleId roleId, bool isNeutral = false, bool isModifier = false, bool isGuessable = false) {
             this.color = color;
             this.name = name;
             this.introDescription = introDescription;
@@ -30,7 +32,8 @@ namespace TheOtherRoles
             this.roleId = roleId;
             this.isNeutral = isNeutral;
             this.isModifier = isModifier;
-            this.isGuessable = isGuessable;
+			roleInfoById.TryAdd(roleId, this);
+			this.isGuessable = isGuessable;
         }
 
         public static RoleInfo jester = new RoleInfo("Jester", Jester.color, "Get voted out", "Get voted out", RoleId.Jester, true);

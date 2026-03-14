@@ -21,6 +21,7 @@ using Reactor.Networking.Attributes;
 using AmongUs.Data;
 using TheOtherRoles.Modules.CustomHats;
 using static TheOtherRoles.Modules.ModUpdater;
+using AmongUs.Data.Player;
 
 namespace TheOtherRoles
 {
@@ -55,41 +56,56 @@ namespace TheOtherRoles
         public static ConfigEntry<bool> ToggleCursor { get; set; }
         public static ConfigEntry<bool> ShowVentsOnMap { get; set; }
 		public static ConfigEntry<bool> ShowChatNotifications { get; set; }
-		public static ConfigEntry<string> Ip { get; set; }
-        public static ConfigEntry<ushort> Port { get; set; }
         public static ConfigEntry<string> ShowPopUpVersion { get; set; }
 
-        public static IRegionInfo[] defaultRegions;
+		// This is part of the Mini.RegionInstaller, Licensed under GPLv3
+		// file="RegionInstallPlugin.cs" company="miniduikboot">
+		public static void UpdateRegions()
+		{
+			ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
+			var regions = new IRegionInfo[]
+			{
+			new StaticHttpRegionInfo(
+				"<color=#00ffff>方块服</color><color=#1E90FF>[上海]</color>",
+				StringNames.NoTranslation,
+				"https://imp.amongusclub.cn",
+				new Il2CppReferenceArray<ServerInfo>(new ServerInfo[1]
+				{
+					new ServerInfo(
+						"<color=#00ffff>方块服</color><color=#1E90FF>[上海]</color>",
+						"https://imp.amongusclub.cn",
+						443, false)
+				})
+			).CastFast<IRegionInfo>()
+			};
 
+			IRegionInfo currentRegion = serverManager.CurrentRegion;
+			Logger.LogInfo($"Adding {regions.Length} regions");
 
-        // This is part of the Mini.RegionInstaller, Licensed under GPLv3
-        // file="RegionInstallPlugin.cs" company="miniduikboot">
-        public static void UpdateRegions() {
-            ServerManager serverManager = FastDestroyableSingleton<ServerManager>.Instance;
-            var regions = new IRegionInfo[] {
-                new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, Ip.Value, new Il2CppReferenceArray<ServerInfo>(new ServerInfo[1] { new ServerInfo("Custom", Ip.Value, Port.Value, false) })).CastFast<IRegionInfo>()
-            };
-            
-            IRegionInfo currentRegion = serverManager.CurrentRegion;
-            Logger.LogInfo($"Adding {regions.Length} regions");
-            foreach (IRegionInfo region in regions) {
-                if (region == null) 
-                    Logger.LogError("Could not add region");
-                else {
-                    if (currentRegion != null && region.Name.Equals(currentRegion.Name, StringComparison.OrdinalIgnoreCase)) 
-                        currentRegion = region;               
-                    serverManager.AddOrUpdateRegion(region);
-                }
-            }
+			foreach (IRegionInfo region in regions)
+			{
+				if (region == null)
+				{
+					Logger.LogError("Could not add region");
+				}
+				else
+				{
+					if (currentRegion != null &&
+						region.Name.Equals(currentRegion.Name, StringComparison.OrdinalIgnoreCase))
+						currentRegion = region;
 
-            // AU remembers the previous region that was set, so we need to restore it
-            if (currentRegion != null) {
-                Logger.LogDebug("Resetting previous region");
-                serverManager.SetRegion(currentRegion);
-            }
-        }
+					serverManager.AddOrUpdateRegion(region);
+				}
+			}
 
-        public override void Load() {
+			if (currentRegion != null)
+			{
+				Logger.LogDebug("Resetting previous region");
+				serverManager.SetRegion(currentRegion);
+			}
+		}
+
+		public override void Load() {
             Logger = Log;
             Instance = this;
   
@@ -110,9 +126,6 @@ namespace TheOtherRoles
             ShowVentsOnMap = Config.Bind("Custom", "Show vent positions on minimap", false);
 			ShowChatNotifications = Config.Bind("Custom", "Show Chat Notifications", true);
 
-			Ip = Config.Bind("Custom", "Custom Server IP", "127.0.0.1");
-            Port = Config.Bind("Custom", "Custom Server Port", (ushort)22023);
-            defaultRegions = ServerManager.DefaultRegions;
 			// Removes vanilla Servers
 			ServerManager.DefaultRegions = new Il2CppReferenceArray<IRegionInfo>(new IRegionInfo[0]);
 			UpdateRegions();
@@ -146,7 +159,7 @@ namespace TheOtherRoles
     }
 
     // Deactivate bans, since I always leave my local testing game and ban myself
-    [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
+    [HarmonyPatch(typeof(PlayerBanData), nameof(PlayerBanData.IsBanned), MethodType.Getter)]
     public static class AmBannedPatch
     {
         public static void Postfix(out bool __result)

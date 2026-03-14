@@ -859,8 +859,9 @@ namespace TheOtherRoles.Patches {
                         if (!trap.revealed) continue;
                         string message = $"Trap {trap.instanceId}: \n";
                         trap.trappedPlayer = trap.trappedPlayer.OrderBy(x => rnd.Next()).ToList();
-                        foreach (PlayerControl p in trap.trappedPlayer)
-                        {
+						foreach (byte playerId in trap.trappedPlayer)
+						{
+							PlayerControl p = Helpers.playerById(playerId);
                             if (Trapper.infoType == 0) message += RoleInfo.GetRolesString(p, false, false, true) + "\n";
                             else if (Trapper.infoType == 1)
                             {
@@ -909,8 +910,8 @@ namespace TheOtherRoles.Patches {
 
                 if (PlayerControl.LocalPlayer.Data.IsDead && output != "") FastDestroyableSingleton<HudManager>.Instance.Chat.AddChat(PlayerControl.LocalPlayer, $"{output}");
 
-                Trapper.playersOnMap = new List<PlayerControl>();
-                Snitch.playerRoomMap = new Dictionary<byte, byte>();
+				Trapper.playersOnMap = new();
+				Snitch.playerRoomMap = new Dictionary<byte, byte>();
 
                 // Remove revealed traps
                 Trap.clearRevealedTraps();

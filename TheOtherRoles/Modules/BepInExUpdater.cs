@@ -16,8 +16,8 @@ namespace TheOtherRoles.Modules;
 
 public class BepInExUpdater : MonoBehaviour
 {
-	public const string RequiredBepInExVersion = "6.0.0-be.697+53625800b86f6c68751445248260edf0b27a71c2";
-	public const string BepInExDownloadURL = "https://builds.bepinex.dev/projects/bepinex_be/697/BepInEx-Unity.IL2CPP-win-x86-6.0.0-be.697%2B5362580.zip"; public static bool UpdateRequired => Paths.BepInExVersion.ToString() != RequiredBepInExVersion;
+	public const string RequiredBepInExVersion = "6.0.0-be.752+dd0655fe9d7473b18b0af759448adaf272878fcf";
+	public const string BepInExDownloadURL = "https://builds.bepinex.dev/projects/bepinex_be/752/BepInEx-Unity.IL2CPP-win-x86-6.0.0-be.752%2Bdd0655f.zip"; public static bool UpdateRequired => Paths.BepInExVersion.ToString() != RequiredBepInExVersion;
 
     public void Awake()
     {
@@ -40,7 +40,7 @@ public class BepInExUpdater : MonoBehaviour
         }
 
         var zipPath = Path.Combine(Paths.GameRootPath, ".bepinex_update");
-        File.WriteAllBytes(zipPath, www.downloadHandler.data);
+        File.WriteAllBytes(zipPath, www.downloadHandler.GetUnstrippedData());
 
         
         var tempPath = Path.Combine(Path.GetTempPath(), "TheOtherUpdater.exe");

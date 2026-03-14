@@ -117,23 +117,23 @@ namespace TheOtherRoles.Patches {
                 Deputy.setHandcuffedKnows();
                 return false;
             }
-            if (Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer)) return false;
+			if (Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer.PlayerId)) return false;
 
-            bool canUse;
+			bool canUse;
             bool couldUse;
             __instance.CanUse(PlayerControl.LocalPlayer.Data, out canUse, out couldUse);
-            bool canMoveInVents = PlayerControl.LocalPlayer != Spy.spy && !Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer);
-            if (!canUse) return false; // No need to execute the native method as using is disallowed anyways
+			bool canMoveInVents = PlayerControl.LocalPlayer != Spy.spy && !Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer.PlayerId);
+			if (!canUse) return false; // No need to execute the native method as using is disallowed anyways
 
             bool isEnter = !PlayerControl.LocalPlayer.inVent;
             
             if (__instance.name.StartsWith("JackInTheBoxVent_")) {
                 __instance.SetButtons(isEnter && canMoveInVents);
-                MessageWriter writer = AmongUsClient.Instance.StartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UseUncheckedVent, Hazel.SendOption.Reliable);
+                MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.UseUncheckedVent, Hazel.SendOption.Reliable);
                 writer.WritePacked(__instance.Id);
                 writer.Write(PlayerControl.LocalPlayer.PlayerId);
                 writer.Write(isEnter ? byte.MaxValue : (byte)0);
-                writer.EndMessage();
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
                 RPCProcedure.useUncheckedVent(__instance.Id, PlayerControl.LocalPlayer.PlayerId, isEnter ? byte.MaxValue : (byte)0);
                 SoundEffectsManager.play("tricksterUseBoxVent");
                 return false;
@@ -152,7 +152,7 @@ namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(Vent), nameof(Vent.TryMoveToVent))]
     public static class MoveToVentPatch {
         public static bool Prefix(Vent otherVent) {
-            return !Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer);
+            return !Trapper.playersOnMap.Contains(PlayerControl.LocalPlayer.PlayerId);
         }
     }
 

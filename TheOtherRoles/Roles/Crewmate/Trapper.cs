@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TheOtherRoles.Roles.Crewmate
@@ -14,7 +15,7 @@ namespace TheOtherRoles.Roles.Crewmate
 		public static int rechargedTasks = 3;
 		public static int charges = 1;
 		public static int trapCountToReveal = 2;
-		public static List<PlayerControl> playersOnMap = new List<PlayerControl>();
+		public static List<byte> playersOnMap = new List<Byte>();
 		public static bool anonymousMap = false;
 		public static int infoType = 0; // 0 = Role, 1 = Good/Evil, 2 = Name
 		public static float trapDuration = 5f;
@@ -37,7 +38,7 @@ namespace TheOtherRoles.Roles.Crewmate
 			rechargedTasks = Mathf.RoundToInt(CustomOptionHolder.trapperRechargeTasksNumber.getFloat());
 			charges = Mathf.RoundToInt(CustomOptionHolder.trapperMaxCharges.getFloat()) / 2;
 			trapCountToReveal = Mathf.RoundToInt(CustomOptionHolder.trapperTrapNeededTriggerToReveal.getFloat());
-			playersOnMap = new List<PlayerControl>();
+			playersOnMap = new ();
 			anonymousMap = CustomOptionHolder.trapperAnonymousMap.getBool();
 			infoType = CustomOptionHolder.trapperInfoType.getSelection();
 			trapDuration = CustomOptionHolder.trapperTrapDuration.getFloat();
