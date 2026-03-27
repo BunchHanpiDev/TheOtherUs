@@ -1321,5 +1321,19 @@ public static bool isTeamCultist(PlayerControl player)
 				return nativeData.ToArray();
 			return null;
 		}
+
+		public static bool isChinese()
+		{
+			try
+			{
+				var name = CultureInfo.CurrentUICulture.Name;
+				if (name.StartsWith("zh")) return true;
+				return false;
+			}
+			catch
+			{
+				return false;
+			}
+		}
 	}
 }
