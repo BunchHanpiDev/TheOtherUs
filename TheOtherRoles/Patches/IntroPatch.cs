@@ -395,7 +395,7 @@ namespace TheOtherRoles.Patches {
         }
 
 
-        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.ShowRole))]
+        [HarmonyPatch(typeof(IntroCutscene._ShowRole_d__41), nameof(IntroCutscene._ShowRole_d__41.MoveNext))]
         class SetUpRoleTextPatch {
             static int seed = 0;
             static public void SetRoleTexts(IntroCutscene __instance) {
@@ -435,10 +435,10 @@ namespace TheOtherRoles.Patches {
                         __instance.RoleBlurbText.text += Helpers.cs(Sheriff.color, $"\nYour Sheriff is {Sheriff.sheriff?.Data?.PlayerName ?? ""}");
                 }
             }
-            public static bool Prefix(IntroCutscene __instance) {
+            public static bool Prefix(IntroCutscene._ShowRole_d__41 __instance) {
                 seed = rnd.Next(5000);
                 FastDestroyableSingleton<HudManager>.Instance.StartCoroutine(Effects.Lerp(1f, new Action<float>((p) => {
-                    SetRoleTexts(__instance);
+                    SetRoleTexts(__instance.__4__this);
                 })));
                 return true;
             }

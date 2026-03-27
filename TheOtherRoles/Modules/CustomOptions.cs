@@ -1180,10 +1180,10 @@ namespace TheOtherRoles {
                     || __instance.PlayerSpeedMod <= 0f || __instance.PlayerSpeedMod > 3f;
         }
 
-        [HarmonyPatch(typeof(NormalGameOptionsV07), nameof(NormalGameOptionsV07.AreInvalid))]
+        [HarmonyPatch(typeof(NormalGameOptionsV10), nameof(NormalGameOptionsV10.AreInvalid))]
         [HarmonyPrefix]
         
-        public static bool Prefix(NormalGameOptionsV07 __instance, ref int maxExpectedPlayers)
+        public static bool Prefix(NormalGameOptionsV10 __instance, ref int maxExpectedPlayers)
         {
             return __instance.MaxPlayers > maxExpectedPlayers || __instance.NumImpostors < 1
                     || __instance.NumImpostors > 3 || __instance.KillDistance < 0
