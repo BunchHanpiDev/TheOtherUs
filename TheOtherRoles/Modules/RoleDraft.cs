@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -398,38 +398,38 @@ namespace TheOtherRoles.Modules
             }
         }
 
-        class PatchedEnumerator() : IEnumerable
+        /// <summary>
+        /// Patches the compiler-generated state machine for IntroCutscene.ShowTeam.
+        /// This replaces the broken direct patch of ShowTeam (which no longer works in modern
+        /// Among Us builds because ShowTeam is a coroutine / IL2CPP state machine).
+        /// Mirrors the approach used by AllTheRoles: patch _ShowTeam_d__38.MoveNext directly.
+        /// When MoveNext() returns false the coroutine is done — we then launch CoSelectRoles.
+        /// </summary>
+        [HarmonyPatch(typeof(IntroCutscene._ShowTeam_d__38), nameof(IntroCutscene._ShowTeam_d__38.MoveNext))]
+        class ShowTeamStateMachinePatch
         {
-            public IEnumerator enumerator;
-            public IEnumerator Postfix;
-            public IEnumerator GetEnumerator()
+            private static bool triggered = false;
+
+            [HarmonyPrefix]
+            public static void Prefix(IntroCutscene._ShowTeam_d__38 __instance)
             {
-                while (enumerator.MoveNext())
-                {
-                    yield return enumerator.Current;
-                }
-                while (Postfix.MoveNext())
-                    yield return Postfix.Current;
+                // __1__state == 0 means the coroutine just started — reset the trigger guard.
+                if (__instance.__1__state == 0)
+                    triggered = false;
             }
-        }
 
-
-        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.ShowTeam))]
-
-        class ShowRolePatch
-        {
             [HarmonyPostfix]
-            public static void Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+            public static void Postfix(IntroCutscene._ShowTeam_d__38 __instance, bool __result)
             {
                 if (!isEnabled) return;
-                var newEnumerator = new PatchedEnumerator()
+                // __result == false means MoveNext() returned false, i.e. the ShowTeam
+                // coroutine has finished. Launch the draft exactly once per intro.
+                if (!__result && !triggered)
                 {
-                    enumerator = __result.WrapToManaged(),
-                    Postfix = CoSelectRoles(__instance)
-                };
-                __result = newEnumerator.GetEnumerator().WrapToIl2Cpp();
+                    triggered = true;
+                    HudManager.Instance.StartCoroutine(CoSelectRoles(__instance.__4__this).WrapToIl2Cpp());
+                }
             }
-
         }
     }
 }

@@ -6,20 +6,14 @@ using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
-using System.Reflection;
 using System.Text;
 using TheOtherRoles.Utilities;
-using static TheOtherRoles.TheOtherRoles;
 using static TheOtherRoles.CustomOption;
 using Reactor.Utilities.Extensions;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
 using BepInEx;
-using static ShipStatus;
 using TMPro;
-using Rewired.Utils.Platforms.Windows;
-using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
-using TheOtherRoles;
 using TheOtherRoles.Roles.Crewmate;
 using TheOtherRoles.Roles.Neutral;
 
@@ -37,7 +31,14 @@ namespace TheOtherRoles {
             PropHunt,
         }
 
-        public static List<CustomOption> options = new List<CustomOption>();
+		public enum OptionType
+		{
+            Toggle,
+            Number,
+            String
+		}
+
+		public static List<CustomOption> options = new List<CustomOption>();
         public static int preset = 0;
         public static ConfigEntry<string> vanillaSettings;
 
@@ -55,10 +56,13 @@ namespace TheOtherRoles {
         public Action onChange = null;
         public string heading = "";
         public bool invertedParent;
+        public OptionType optionType;
+
+        public static int settingNum = 1;
 
         // Option creation
 
-        public CustomOption(int id, CustomOptionType type, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader, Action onChange = null, string heading = "", bool invertedParent = false) {
+        public CustomOption(int id, CustomOptionType type, string name,  System.Object[] selections, System.Object defaultValue, CustomOption parent, bool isHeader, Action onChange = null, string heading = "", bool invertedParent = false, OptionType optionType = OptionType.String) {
             this.id = id;
             this.name = parent == null ? name : "- " + name;
             this.selections = selections;
@@ -70,6 +74,7 @@ namespace TheOtherRoles {
             this.onChange = onChange;
             this.heading = heading;
             this.invertedParent = invertedParent;
+            this.optionType = optionType;
             selection = 0;
             if (id != 0) {
                 entry = TheOtherRolesPlugin.Instance.Config.Bind($"Preset{preset}", id.ToString(), defaultSelection);
@@ -78,19 +83,19 @@ namespace TheOtherRoles {
             options.Add(this);
         }
 
-        public static CustomOption Create(int id, CustomOptionType type, string name, string[] selections, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
-            return new CustomOption(id, type, name, selections, "", parent, isHeader, onChange, heading, invertedParent);
+        public static CustomOption CreateString(CustomOptionType type, string name, string[] selections, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
+            return new CustomOption(settingNum++, type, name, selections, "", parent, isHeader, onChange, heading, invertedParent, OptionType.String);
         }
 
-        public static CustomOption Create(int id, CustomOptionType type, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
+        public static CustomOption CreateNumber(CustomOptionType type, string name, float defaultValue, float min, float max, float step, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
             List<object> selections = new();
             for (float s = min; s <= max; s += step)
                 selections.Add(s);
-            return new CustomOption(id, type, name, selections.ToArray(), defaultValue, parent, isHeader, onChange, heading, invertedParent);
+            return new CustomOption(settingNum++, type, name, selections.ToArray(), defaultValue, parent, isHeader, onChange, heading, invertedParent, OptionType.Number);
         }
 
-        public static CustomOption Create(int id, CustomOptionType type, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
-            return new CustomOption(id, type, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader, onChange, heading, invertedParent);
+        public static CustomOption CreateToggle(CustomOptionType type, string name, bool defaultValue, CustomOption parent = null, bool isHeader = false, Action onChange = null, string heading = "", bool invertedParent = false) {
+            return new CustomOption(settingNum++, type, name, new string[]{"Off", "On"}, defaultValue ? "On" : "Off", parent, isHeader, onChange, heading, invertedParent, OptionType.Toggle);
         }
 
         // Static behaviour
@@ -189,8 +194,15 @@ namespace TheOtherRoles {
             return selection + 1;
         }
 
+		public static bool IsOptionVisible(CustomOption option)
+		{
+			if (option.parent == null) return true;
+			if (option.parent.selection == 0 && !option.invertedParent) return false;
+			if (option.parent.selection != 0 && option.invertedParent) return false;
+			return IsOptionVisible(option.parent);
+		}
 
-        public void updateSelection(int newSelection, bool notifyUsers = true) {
+		public void updateSelection(int newSelection, bool notifyUsers = true) {
             newSelection = Mathf.Clamp((newSelection + selections.Length) % selections.Length, 0, selections.Length - 1);
             if (AmongUsClient.Instance?.AmClient == true && notifyUsers && selection != newSelection) {
                 DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage((StringNames)(this.id + 6000), selections[newSelection].ToString(), false);
@@ -477,8 +489,8 @@ namespace TheOtherRoles {
                 overview.transform.localPosition += new Vector3(-1.2f, 0f, 0f);
                 
             }
-            overview.transform.Find("FontPlacer").transform.localScale = new Vector3(1.35f, 1f, 1f);
-            overview.transform.Find("FontPlacer").transform.localPosition = new Vector3(-0.6f, -0.1f, 0f);
+            overview.transform.Find("FontPlacer").transform.localScale = new Vector3(2.15f, 1f, 1f);
+            overview.transform.Find("FontPlacer").transform.localPosition = new Vector3(-2f, -0.1f, 0f);
             gameModeChangedFlag = false;
         }
 
@@ -495,12 +507,12 @@ namespace TheOtherRoles {
                 relevantOptions.AddRange(options.Where(x => x.type == CustomOptionType.Modifier && x.isHeader));
                 foreach (var option in options) {
                     if (option.parent != null && option.parent.getSelection() > 0) {
-                        if (option.id == 103) //Deputy
+                        if (option == CustomOptionHolder.deputySpawnRate) //Deputy
                             relevantOptions.Insert(relevantOptions.IndexOf(CustomOptionHolder.sheriffSpawnRate) + 1, option);
-                        else if (option.id == 224) //Sidekick
-                            relevantOptions.Insert(relevantOptions.IndexOf(CustomOptionHolder.jackalSpawnRate) + 1, option);
-                        else if (option.id == 358) //Prosecutor
-                            relevantOptions.Insert(relevantOptions.IndexOf(CustomOptionHolder.lawyerSpawnRate) + 1, option);
+                        else if (option == CustomOptionHolder.jackalCanCreateSidekick) //Sidekick
+							relevantOptions.Insert(relevantOptions.IndexOf(CustomOptionHolder.jackalSpawnRate) + 1, option);
+                        else if (option == CustomOptionHolder.lawyerIsProsecutorChance) //Prosecutor
+							relevantOptions.Insert(relevantOptions.IndexOf(CustomOptionHolder.lawyerSpawnRate) + 1, option);
                     }
                 }
             }
@@ -542,8 +554,8 @@ namespace TheOtherRoles {
                     __instance.settingsInfo.Add(categoryHeaderMasked.gameObject);
                     num -= 1.05f;
                     i = 0;
-                } else if (option.parent != null && (option.parent.selection == 0 || option.parent.parent != null && option.parent.parent.selection == 0)) continue;  // Hides options, for which the parent is disabled!
-                if (option == CustomOptionHolder.crewmateRolesCountMax || option == CustomOptionHolder.neutralRolesCountMax || option == CustomOptionHolder.impostorRolesCountMax || option == CustomOptionHolder.modifiersCountMax || option == CustomOptionHolder.crewmateRolesFill)
+                } else if (option.parent != null && !IsOptionVisible(option)) continue; // Hides options, for which the parent is disabled!
+				if (option == CustomOptionHolder.crewmateRolesCountMax || option == CustomOptionHolder.neutralRolesCountMax || option == CustomOptionHolder.impostorRolesCountMax || option == CustomOptionHolder.modifiersCountMax || option == CustomOptionHolder.crewmateRolesFill)
                     continue;
 
                 ViewSettingsInfoPanel viewSettingsInfoPanel = UnityEngine.Object.Instantiate<ViewSettingsInfoPanel>(__instance.infoPanelOrigin);
@@ -633,16 +645,16 @@ namespace TheOtherRoles {
             if (TORMapOptions.gameMode == CustomGamemodes.Guesser || TORMapOptions.gameMode == CustomGamemodes.Classic) {
 
                 // create TOUs settings
-                createCustomButton(__instance, next++, "TOUsSettings", "TOUs Settings", CustomOptionType.General);
+                createCustomButton(__instance, next++, "TOUsSettings", "Settings", CustomOptionType.General);
                    // create TOUs settings
-                createCustomButton(__instance, next++, "RoleOverview", "Role Overview", (CustomOptionType)99);
+                createCustomButton(__instance, next++, "RoleOverview", "Overview", (CustomOptionType)99);
                 // IMp
-                createCustomButton(__instance, next++, "ImpostorSettings", "Impostor Roles", CustomOptionType.Impostor);
+                createCustomButton(__instance, next++, "ImpostorSettings", "Impostor", CustomOptionType.Impostor);
 
                 // Neutral
-                createCustomButton(__instance, next++, "NeutralSettings", "Neutral Roles", CustomOptionType.Neutral);
+                createCustomButton(__instance, next++, "NeutralSettings", "Neutral", CustomOptionType.Neutral);
                 // Crew
-                createCustomButton(__instance, next++, "CrewmateSettings", "Crewmate Roles", CustomOptionType.Crewmate);
+                createCustomButton(__instance, next++, "CrewmateSettings", "Crewmate", CustomOptionType.Crewmate);
                 // Modifier
                 createCustomButton(__instance, next++, "ModifierSettings", "Modifiers", CustomOptionType.Modifier);
 
@@ -760,38 +772,109 @@ namespace TheOtherRoles {
                     categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
                     categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
                     num -= 0.63f;
-                } else if (option.parent != null && (option.parent.selection == 0 && !option.invertedParent || option.parent.parent != null && option.parent.parent.selection == 0 && !option.parent.invertedParent)) continue;  // Hides options, for which the parent is disabled!
-                else if (option.parent != null && option.parent.selection != 0 && option.invertedParent) continue;
-                OptionBehaviour optionBehaviour = UnityEngine.Object.Instantiate<StringOption>(menu.stringOptionOrigin, Vector3.zero, Quaternion.identity, menu.settingsContainer);
-                optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                optionBehaviour.SetClickMask(menu.ButtonClickMask);
+                } else if (option.parent != null && !IsOptionVisible(option)) continue;  // Hides options, for which the parent is disabled!
+				else if (option.parent != null && option.parent.selection != 0 && option.invertedParent) continue;
+				if (option.optionType == OptionType.String)
+				{
+					OptionBehaviour optionBehaviour = UnityEngine.Object.Instantiate(menu.stringOptionOrigin, Vector3.zero, Quaternion.identity, menu.settingsContainer);
+					optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
+					optionBehaviour.SetClickMask(menu.ButtonClickMask);
 
-                // "SetUpFromData"
-                SpriteRenderer[] componentsInChildren = optionBehaviour.GetComponentsInChildren<SpriteRenderer>(true);
-                for (int i = 0; i < componentsInChildren.Length; i++) {
-                    componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
-                }
-                foreach (TextMeshPro textMeshPro in optionBehaviour.GetComponentsInChildren<TextMeshPro>(true)) {
-                    textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
-                    textMeshPro.fontMaterial.SetFloat("_Stencil", (float)20);
-                }
+					// "SetUpFromData"
+					SpriteRenderer[] componentsInChildren = optionBehaviour.GetComponentsInChildren<SpriteRenderer>(true);
+					for (int i = 0; i < componentsInChildren.Length; i++)
+					{
+						componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+					}
+					foreach (TextMeshPro textMeshPro in optionBehaviour.GetComponentsInChildren<TextMeshPro>(true))
+					{
+						textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
+						textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+					}
 
-                var stringOption = optionBehaviour as StringOption;
-                stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
-                stringOption.TitleText.text = option.name;
-                if (option.isHeader && option.heading == "" && (option.type == CustomOptionType.Neutral || option.type == CustomOptionType.Crewmate || option.type == CustomOptionType.Impostor || option.type == CustomOptionType.Modifier)) {
-                    stringOption.TitleText.text = "Spawn Chance";
-                }
-                if (stringOption.TitleText.text.Length > 25)
-                    stringOption.TitleText.fontSize = 2.2f;
-                if (stringOption.TitleText.text.Length > 40)
-                    stringOption.TitleText.fontSize = 2f;
-                stringOption.Value = stringOption.oldValue = option.selection;
-                stringOption.ValueText.text = option.selections[option.selection].ToString();
-                option.optionBehaviour = stringOption;
+					var stringOption = optionBehaviour as StringOption;
+					stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
+					stringOption.TitleText.text = option.name;
+					if (option.isHeader && option.heading == "" && (option.type == CustomOptionType.Neutral || option.type == CustomOptionType.Crewmate || option.type == CustomOptionType.Impostor || option.type == CustomOptionType.Modifier))
+					{
+						stringOption.TitleText.text = "Spawn Chance";
+					}
+					if (stringOption.TitleText.text.Length > 25)
+						stringOption.TitleText.fontSize = 2.2f;
+					if (stringOption.TitleText.text.Length > 40)
+						stringOption.TitleText.fontSize = 2f;
+					stringOption.Value = stringOption.oldValue = option.selection;
+					stringOption.ValueText.text = option.selections[option.selection].ToString();
+					option.optionBehaviour = stringOption;
 
-                menu.Children.Add(optionBehaviour);
-                num -= 0.45f;
+					menu.Children.Add(optionBehaviour);
+				}
+				else if (option.optionType == OptionType.Number)
+				{
+					OptionBehaviour optionBehaviour = UnityEngine.Object.Instantiate(menu.numberOptionOrigin, Vector3.zero, Quaternion.identity, menu.settingsContainer);
+					optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
+					optionBehaviour.SetClickMask(menu.ButtonClickMask);
+
+					// "SetUpFromData"
+					SpriteRenderer[] componentsInChildren = optionBehaviour.GetComponentsInChildren<SpriteRenderer>(true);
+					for (int i = 0; i < componentsInChildren.Length; i++)
+					{
+						componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+					}
+					foreach (TextMeshPro textMeshPro in optionBehaviour.GetComponentsInChildren<TextMeshPro>(true))
+					{
+						textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
+						textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+					}
+
+					var stringOption = optionBehaviour as NumberOption;
+					stringOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
+					stringOption.TitleText.text = option.name;
+					if (stringOption.TitleText.text.Length > 25)
+						stringOption.TitleText.fontSize = 2.2f;
+					if (stringOption.TitleText.text.Length > 40)
+						stringOption.TitleText.fontSize = 2f;
+					stringOption.Value = stringOption.oldValue = option.selection;
+					stringOption.ValueText.text = option.selections[option.selection].ToString();
+					float min = (float)option.selections[0];
+					float max = (float)option.selections[option.selections.Length - 1];
+					float step = (float)option.selections[1] - (float)option.selections[0];
+					stringOption.ValidRange.min = min;
+					stringOption.ValidRange.max = max;
+					stringOption.Increment = step;
+                    option.optionBehaviour = stringOption;
+
+					menu.Children.Add(optionBehaviour);
+				}
+                else if (option.optionType == OptionType.Toggle)
+				{
+					OptionBehaviour optionBehaviour = UnityEngine.Object.Instantiate(menu.checkboxOrigin, Vector3.zero, Quaternion.identity, menu.settingsContainer);
+					optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
+					optionBehaviour.SetClickMask(menu.ButtonClickMask);
+
+					// "SetUpFromData"
+					SpriteRenderer[] componentsInChildren = optionBehaviour.GetComponentsInChildren<SpriteRenderer>(true);
+					for (int i = 0; i < componentsInChildren.Length; i++)
+					{
+						componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+					}
+					foreach (TextMeshPro textMeshPro in optionBehaviour.GetComponentsInChildren<TextMeshPro>(true))
+					{
+						textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
+						textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+					}
+
+					var toggleOption = optionBehaviour as ToggleOption;
+					toggleOption.OnValueChanged = new Action<OptionBehaviour>((o) => { });
+
+					//toggleOption.Title = CustomStringName.CreateAndRegister(option.getName());
+
+					option.optionBehaviour = toggleOption;
+					toggleOption.CheckMark.enabled = toggleOption.oldValue = (option.selection != 0);
+
+					menu.Children.Add(optionBehaviour);
+				}
+				num -= 0.45f;
                 menu.scrollBar.SetYBoundsMax(-num - 1.65f);
             }
 
@@ -905,7 +988,8 @@ namespace TheOtherRoles {
     }
 
     [HarmonyPatch(typeof(StringOption), nameof(StringOption.Initialize))]
-    public class StringOptionEnablePatch {
+    public class StringOptionInitializePatch
+	{
         public static bool Prefix(StringOption __instance) {
             CustomOption option = CustomOption.options.FirstOrDefault(option => option.optionBehaviour == __instance);
             if (option == null) return true;
@@ -972,14 +1056,122 @@ namespace TheOtherRoles {
         }
     }
 
+	[HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Initialize))]
+	public class NumberOptionInitializePatch
+	{
+		public static bool Prefix(NumberOption __instance)
+		{
+			CustomOption option = CustomOption.options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null) return true;
 
-    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSyncSettings))]
+			__instance.OnValueChanged = new Action<OptionBehaviour>((o) => { });
+			//__instance.TitleText.text = option.name;
+			__instance.Value = __instance.oldValue = option.selection;
+			__instance.ValueText.text = option.selections[option.selection].ToString();
+
+			return false;
+		}
+	}
+
+	[HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Increase))]
+	public class NumberOptionIncreasePatch
+	{
+		public static bool Prefix(NumberOption __instance)
+		{
+			CustomOption option = CustomOption.options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null) return true;
+			option.updateSelection(option.selection + 1);
+			if (CustomOptionHolder.isMapSelectionOption(option))
+			{
+				IGameOptions currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
+				currentGameOptions.SetByte(ByteOptionNames.MapId, (byte)option.selection);
+				GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
+				GameManager.Instance.LogicOptions.SyncOptions();
+			}
+			return false;
+		}
+	}
+
+	[HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Decrease))]
+	public class NumberOptionDecreasePatch
+	{
+		public static bool Prefix(NumberOption __instance)
+		{
+			CustomOption option = CustomOption.options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null) return true;
+			option.updateSelection(option.selection - 1);
+			if (CustomOptionHolder.isMapSelectionOption(option))
+			{
+				IGameOptions currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
+				currentGameOptions.SetByte(ByteOptionNames.MapId, (byte)option.selection);
+				GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
+				GameManager.Instance.LogicOptions.SyncOptions();
+			}
+			return false;
+		}
+	}
+
+	[HarmonyPatch(typeof(NumberOption), nameof(NumberOption.FixedUpdate))]
+	public class NumberOptionixedUpdate
+	{
+		public static void Postfix(NumberOption __instance)
+		{
+			if (!IL2CPPChainloader.Instance.Plugins.TryGetValue("com.DigiWorm.LevelImposter", out PluginInfo _)) return;
+			CustomOption option = CustomOption.options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null || !CustomOptionHolder.isMapSelectionOption(option)) return;
+			if (GameOptionsManager.Instance.CurrentGameOptions.MapId == 6)
+				if (option.optionBehaviour != null && option.optionBehaviour is NumberOption numberOption)
+				{
+					numberOption.ValueText.text = option.selections[option.selection].ToString();
+				}
+				else if (option.optionBehaviour != null && option.optionBehaviour is NumberOption numberOptionToo)
+				{
+					numberOptionToo.oldValue = numberOptionToo.Value = option.selection;
+					numberOptionToo.ValueText.text = option.selections[option.selection].ToString();
+				}
+		}
+	}
+
+	[HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Initialize))]
+	public class ToggleOptionEnablePatch
+	{
+		public static bool Prefix(ToggleOption __instance)
+		{
+			CustomOption option = options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null) return true;
+
+			__instance.OnValueChanged = new Action<OptionBehaviour>((o) => { });
+			__instance.TitleText.text = option.name;
+			if (__instance.TitleText.text.Length > 25)
+				__instance.TitleText.fontSize = 2.2f;
+			if (__instance.TitleText.text.Length > 40)
+				__instance.TitleText.fontSize = 2f;
+
+			return false;
+		}
+	}
+
+	[HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Toggle))]
+	public class ToggleButtonPatch
+	{
+		public static bool Prefix(ToggleOption __instance)
+		{
+			CustomOption option = options.FirstOrDefault(option => option.optionBehaviour == __instance);
+			if (option == null) return true;
+			var changeValue = option.getBool() ? 0 : 1;
+			option.updateSelection(changeValue);
+			return false;
+		}
+	}
+
+
+	[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSyncSettings))]
     public class RpcSyncSettingsPatch
     {
         public static void Postfix()
         {
-            CustomOption.saveVanillaOptions();
 			CustomOption.ShareOptionSelections();
+			CustomOption.saveVanillaOptions();
 		}
 	}
 
@@ -1027,12 +1219,12 @@ namespace TheOtherRoles {
                     sb.AppendLine(line);
                 }
                 else if (option.parent.getSelection() > 0 || option.invertedParent && option.parent.getSelection() == 0) {
-                    if (option.id == 103) //Deputy
-                        sb.AppendLine($"- {Helpers.cs(Deputy.color, "Deputy")}: {option.selections[option.selection].ToString()}");
-                    else if (option.id == 224) //Sidekick
-                        sb.AppendLine($"- {Helpers.cs(Sidekick.color, "Sidekick")}: {option.selections[option.selection].ToString()}");
-                    else if (option.id == 358) //Prosecutor
-                        sb.AppendLine($"- {Helpers.cs(Lawyer.color, "Prosecutor")}: {option.selections[option.selection].ToString()}");
+                    if (option == CustomOptionHolder.deputySpawnRate) //Deputy
+                        sb.AppendLine($"- {Helpers.cs(Deputy.color, RoleInfo.roleInfoById[RoleId.Deputy].name)}: {option.selections[option.selection].ToString()}");
+                    else if (option == CustomOptionHolder.jackalCanCreateSidekick) //Sidekick
+						sb.AppendLine($"- {Helpers.cs(Sidekick.color, RoleInfo.roleInfoById[RoleId.Sidekick].name)}: {option.selections[option.selection].ToString()}");
+                    else if (option == CustomOptionHolder.lawyerIsProsecutorChance) //Prosecutor
+						sb.AppendLine($"- {Helpers.cs(Lawyer.color, RoleInfo.roleInfoById[RoleId.Prosecutor].name)}: {option.selections[option.selection].ToString()}");
                 }
             }
             if (headerOnly) return sb.ToString();

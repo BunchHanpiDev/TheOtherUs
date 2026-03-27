@@ -33,7 +33,7 @@ namespace TheOtherRoles
     public class TheOtherRolesPlugin : BasePlugin
     {
         public const string Id = "me.eisbison.theotherroles";
-        public const string VersionString = "1.3.5";
+        public const string VersionString = "2.1.0";
         public static uint betaDays = 0;  // amount of days for the build to be usable (0 for infinite!)
 
         public static Version Version = Version.Parse(VersionString);
@@ -66,14 +66,14 @@ namespace TheOtherRoles
 			var regions = new IRegionInfo[]
 			{
 			new StaticHttpRegionInfo(
-				"<color=#00ffff>方块服</color><color=#1E90FF>[上海]</color>",
+				"<color=#00ffff>TheOtherUs</color><color=#1E90FF>[ShangHai]</color>",
 				StringNames.NoTranslation,
-				"https://imp.amongusclub.cn",
+				"https://tousimp.amongusclub.cn",
 				new Il2CppReferenceArray<ServerInfo>(new ServerInfo[1]
 				{
 					new ServerInfo(
-						"<color=#00ffff>方块服</color><color=#1E90FF>[上海]</color>",
-						"https://imp.amongusclub.cn",
+						"<color=#00ffff>TheOtherUs</color><color=#1E90FF>[ShangHai]</color>",
+						"https://tousimp.amongusclub.cn",
 						443, false)
 				})
 			).CastFast<IRegionInfo>()
@@ -154,7 +154,8 @@ namespace TheOtherRoles
             MainMenuPatch.addSceneChangeCallbacks();
             _ = RoleInfo.loadReadme();
             AddToKillDistanceSetting.addKillDistance();
-            TheOtherRolesPlugin.Logger.LogInfo("Loading TOR completed!");
+
+            Logger.LogInfo("Loading TOUs completed!");
         }
     }
 
